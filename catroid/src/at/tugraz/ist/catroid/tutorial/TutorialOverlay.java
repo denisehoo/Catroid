@@ -18,6 +18,11 @@
  */
 package at.tugraz.ist.catroid.tutorial;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -25,170 +30,59 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 /**
- * @author User
+ * @author faxxe
  * 
  */
 public class TutorialOverlay extends SurfaceView implements SurfaceHolder.Callback {
+	private Context context;
+	//	private ArrayList<SurfaceObject> surfaceObjects;
+	List<SurfaceObject> surfaceObjects = Collections.synchronizedList(new ArrayList<SurfaceObject>());
+	//	private AnimationThread animationThread;
+	private Cloud cloud;
+	private CloudController co;
+	private ControlPanel panel;
 
-	Tutor tutor;
-	Tutor tutor_2;
-	Tutor currentTutor;
-	ControlPanel panel;
-	Context context;
-	//	Cloud cloud;
+	@Override
+	protected void finalize() throws Throwable {
+		getHolder().removeCallback(this);
+		surfaceObjects.clear();
+		surfaceObjects = null;
+		cloud = null;
+		co = null;
+		super.finalize();
 
-	ClickDispatcher clickDispatcher;
+	};
 
-	private AnimationThread mThread;
+	public void playIntro(SurfaceObject intro) {
 
-	/**
-	 * @param context
-	 */
-	public TutorialOverlay(Context context, Tutor tutor, Tutor tutor_2) {
+	}
+
+	public void clean() {
+		getHolder().removeCallback(this);
+		surfaceObjects.clear();
+		surfaceObjects = null;
+		cloud = null;
+		co = null;
+		panel = null;
+		context = null;
+	}
+
+	public TutorialOverlay(Context context) {
 		super(context);
+		this.context = context;
 		this.setBackgroundColor(Color.TRANSPARENT);
 		this.setZOrderOnTop(true); //necessary
 		getHolder().setFormat(PixelFormat.TRANSPARENT);
-		this.tutor = tutor;
-		this.tutor_2 = tutor_2;
-
-		currentTutor = tutor;
-		panel = new ControlPanel(getResources(), context);
-		clickDispatcher = new ClickDispatcher(context, panel);
 		getHolder().addCallback(this);
-		mThread = new AnimationThread(this);
-		this.context = context;
-		//		cloud = Cloud.getInstance(context);
-	}
-
-	public ClickDispatcher getClickDispatcher() {
-		return clickDispatcher;
-	}
-
-	@Override
-	public boolean dispatchTouchEvent(MotionEvent ev) {
-		clickDispatcher.dispatchEvent(ev);
-		return false;
-	}
-
-	public void switchToDog() {
-		currentTutor = tutor_2;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.view.View#dispatchKeyEvent(android.view.KeyEvent)
-	 */
-	@Override
-	public boolean dispatchKeyEvent(KeyEvent event) {
-		// TODO Auto-generated method stub
-		Log.i("faxxe", "dispatchKeyEvent");
-		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.view.View#dispatchKeyEventPreIme(android.view.KeyEvent)
-	 */
-	@Override
-	public boolean dispatchKeyEventPreIme(KeyEvent event) {
-		// TODO Auto-generated method stub
-		Log.i("faxxe", "dispatchKeyEvent");
-		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see android.view.View#dispatchKeyShortcutEvent(android.view.KeyEvent)
-	 */
-	@Override
-	public boolean dispatchKeyShortcutEvent(KeyEvent event) {
-		// TODO Auto-generated method stub
-		return super.dispatchKeyShortcutEvent(event);
-	}
-
-	public void switchToCat() {
-		currentTutor = tutor;
-	}
-
-	public void flip() {
-		currentTutor.flip();
-	}
-
-	public void idle() {
-		tutor.idle();
-		tutor_2.idle();
-	}
-
-	public void say(String text) {
-		currentTutor.say(text);
-	}
-
-	public void jumpTo(int x, int y) {
-		currentTutor.jumpTo(x, y);
-	}
-
-	public void appear(int x, int y) {
-		currentTutor.appear(x, y);
-	}
-
-	public void disappear() {
-		currentTutor.disappear();
-	}
-
-	public void point() {
-		currentTutor.point();
-	}
-
-	@Override
-	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public void surfaceCreated(SurfaceHolder holder) {
-		// DEBUG, is nur a test de line
-		try {
-			//			Thread.sleep(10);
-			Thread.yield();
-		} catch (Exception e) {
-
-		}
-
-		if (!mThread.isAlive()) {
-			mThread = new AnimationThread(this);
-			mThread.setRunning(true);
-			mThread.setName("AnimationThread");
-			mThread.start();
-		}
-	}
-
-	@Override
-	public void surfaceDestroyed(SurfaceHolder holder) {
-
-		// simply copied from sample application LunarLander:
-		// we have to tell thread to shut down & wait for it to finish, or else
-		// it might touch the Surface after we return and explode
-		boolean retry = true;
-		mThread.setRunning(false);
-		while (retry) {
-			try {
-				mThread.join();
-				retry = false;
-			} catch (InterruptedException e) {
-				// we will try it again and again...
-			}
-		}
+		surfaceObjects = new ArrayList<SurfaceObject>();
+		panel = new ControlPanel(context);
+		surfaceObjects.add(panel);
+		co = new CloudController();
 	}
 
 	@Override
@@ -197,16 +91,118 @@ public class TutorialOverlay extends SurfaceView implements SurfaceHolder.Callba
 		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
 		canvas.drawPaint(paint);
 		postInvalidate();
-		//		cloud.draw(canvas);
-		tutor.draw(canvas);
-		tutor_2.draw(canvas);
-		panel.draw(canvas);
+		if (cloud == null) {
+			cloud = Cloud.getInstance(getContext());
+		}
+		cloud.draw(canvas);
+		if (surfaceObjects != null) {
+			synchronized (surfaceObjects) {
+				for (SurfaceObject tmp : surfaceObjects) {
+					if (tmp != null) {
+						tmp.update(System.currentTimeMillis());
+						tmp.draw(canvas);
+					}
+				}
+			}
+		}
 	}
 
-	public void update() {
-		tutor.update(System.currentTimeMillis());
-		tutor_2.update(System.currentTimeMillis());
-		//		cloud.update(System.currentTimeMillis());
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+		getHolder().addCallback(this);
+		cloud = Cloud.getInstance(context);
+	}
+
+	@Override
+	public void surfaceCreated(SurfaceHolder holder) {
+		getHolder().addCallback(this);
+	}
+
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		getHolder().removeCallback(this);
+	}
+
+	public void addSurfaceObject(SurfaceObject surfaceObject) {
+		if (!surfaceObjects.contains(surfaceObject)) {
+			synchronized (surfaceObjects) {
+				surfaceObjects.add(surfaceObject);
+			}
+		}
+	}
+
+	public void removeSurfaceObject(SurfaceObject surfaceViewObject) {
+		if (surfaceObjects.contains(surfaceViewObject)) {
+			synchronized (surfaceObjects) {
+				surfaceObjects.remove(surfaceViewObject);
+			}
+		}
+	}
+
+	public void addCloud(Cloud cloud) {
+		this.cloud = cloud;
+	}
+
+	public void removeCloud() {
+		this.cloud = null;
+	}
+
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent ev) {
+		Activity activity = (Activity) context;
+		boolean retval = false;
+		if (panel.isOpen()) {
+			panel.close();
+		}
+		float displayHeight = activity.getWindowManager().getDefaultDisplay().getHeight();
+		//		clickDispatcher.dispatchEvent(ev);
+		ClickableArea clickableArea = Cloud.getInstance(null).getClickableArea();
+
+		if (ev.getY() > displayHeight - 100) {
+			dispatchPanel(ev, displayHeight);
+		}
+		if (clickableArea == null || clickableArea.x == 0 && clickableArea.y == 0) {
+			return false;
+		}
+		if (isEVinArea(clickableArea, ev)) {
+			retval = Tutorial.getInstance(null).dispatchTouchEvent(ev);
+			co.disapear();
+		}
+		return retval;
+	}
+
+	public void dispatchPanel(MotionEvent ev, float displayHeight) {
+		//TODO: Dispatch ALL the Panel!
+
+		double y1 = displayHeight;
+		double y2 = ev.getY();
+		double diffx = ev.getX();
+		double diffy = y1 - y2;
+		double distance = Math.sqrt(diffx * diffx + diffy * diffy);
+		if (distance < 70 && panel != null) {
+			if (!panel.isOpen()) {
+				panel.open();
+			} else {
+				panel.close();
+			}
+		} else if (ev.getY() > displayHeight - 50) {
+			Tutorial.getInstance(null).stopButtonTutorial();
+		}
+	}
+
+	public boolean isEVinArea(ClickableArea area, MotionEvent ev) {
+		float x = ev.getX();
+		float y = ev.getY();
+
+		if (x > area.x && x < area.x + area.width && y > area.y && y < area.y + area.height) {
+			return true;
+		}
+
+		return false;
+	}
+
+	public float abs(float fl) {
+		return (fl > 0) ? fl : fl * -1;
 	}
 
 }

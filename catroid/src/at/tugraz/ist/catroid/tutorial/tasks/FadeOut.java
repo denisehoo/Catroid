@@ -16,29 +16,51 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package at.tugraz.ist.catroid.tutorial;
+package at.tugraz.ist.catroid.tutorial.tasks;
+
+import java.util.HashMap;
+
+import at.tugraz.ist.catroid.tutorial.CloudController;
+import at.tugraz.ist.catroid.tutorial.SurfaceObjectTutor;
 
 /**
  * @author faxxe
- *
+ * 
  */
-import android.app.Activity;
-import android.os.Bundle;
+public class FadeOut implements Task {
 
-public class ClearActivity extends Activity {
-
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see at.tugraz.ist.catroid.tutorial.tasks.Task#getType()
+	 */
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	public Type getType() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see at.tugraz.ist.catroid.tutorial.tasks.Task#getTutorType()
+	 */
 	@Override
-	protected void onPause() {
-		super.onPause();
+	public Tutor getTutorType() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see at.tugraz.ist.catroid.tutorial.tasks.Task#execute(java.util.HashMap)
+	 */
 	@Override
-	protected void onResume() {
-		super.onResume();
+	public boolean execute(HashMap<Tutor, SurfaceObjectTutor> tutors) {
+		CloudController co = new CloudController();
+		co.fadeOut();
+		return false;
 	}
+
 }

@@ -18,213 +18,145 @@
  */
 package at.tugraz.ist.catroid.tutorial;
 
-import java.util.ArrayList;
-
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TabHost;
-import at.tugraz.ist.catroid.R;
-import at.tugraz.ist.catroid.common.Values;
-import at.tugraz.ist.catroid.tutorial.tasks.Task;
-import at.tugraz.ist.catroid.tutorial.tasks.Task.Notification;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Path.Direction;
 
-public class Cloud {
-	private static Cloud cloud;
-	int focusX1;
-	int focusY1;
-	int focusX2;
-	int focusY2;
-
-	int originalFocusX1;
-	int originalFocusY1;
-	int originalFocusX2;
-	int originalFocusY2;
-
-	int animationOffsetX;
-	int animationOffsetY;
-	int stateOfAnimation = 0;
-
-	private Drawable drawableInnerPart;
-	private Drawable drawableOuterPartRight;
-	private Drawable drawableOuterPartLeft;
-	private Drawable drawableOuterPartTop;
-	private Drawable drawableOuterPartBottom;
-
-	private long timeOfLastUpdate;
-	private static final long updateAfterMilliseconds = 300;
-
-	private Context context;
+public class Cloud implements SurfaceObject {
+	private Paint paint = new Paint();
+	private static Context context;
+	private static Cloud cloud = null;
+	private static int alpha = 255;
+	float radius = 90;
+	float startX = 0;
+	float startY = 0;
+	float targetAlpha = 255;
+	boolean show = false;
+	double actX = 0;
+	double actY = 0;
+	float sollX = 100;
+	float sollY = 100;
+	boolean visible;
+	ClickableArea clickableArea;
 
 	private Cloud() {
+
 	}
 
-	public static Cloud getInstance(Context context) {
+	public void clear() {
+		cloud = null;
+	}
+
+	public static Cloud getInstance(Context con) {
+		if (con != null) {
+			context = con;
+			alpha = 255; // not necessary but cool!
+		}
 		if (cloud == null) {
 			cloud = new Cloud();
 		}
-		if (context != null) {
-			cloud.setContext(context);
-		}
-		cloud.clearCloud();
-		return (cloud);
+		cloud.fadeIn();
+		return cloud;
 	}
 
-	void setContext(Context context) {
-		this.context = context;
+	@Override
+	public void update(long time) {
+
 	}
 
-	public void setCloud(Notification notification) {
-		if (context == null) {
-			return;
-		}
-
-		if (notification == Task.Notification.CURRENT_PROJECT_BUTTON) {
-			Button newProjectButton = (Button) ((Activity) context).findViewById(R.id.current_project_button);
-			setBitmap();
-			fetchViewPosition(newProjectButton);
-		}
-
-		if (notification == Task.Notification.TAB_COSTUMES) {
-			Activity currentActivity = ((Activity) context).getParent();
-			TabHost tabHost = (TabHost) currentActivity.findViewById(android.R.id.tabhost);
-			ArrayList<View> tabViews = tabHost.getTouchables();
-			LinearLayout tab = (LinearLayout) tabViews.get(1);
-			setBitmap();
-			fetchViewPosition(tab);
-		}
-
-		if (notification == Task.Notification.TAB_SCRIPTS) {
-			Activity currentActivity = ((Activity) context).getParent();
-			TabHost tabHost = (TabHost) currentActivity.findViewById(android.R.id.tabhost);
-			ArrayList<View> tabViews = tabHost.getTouchables();
-			LinearLayout tab = (LinearLayout) tabViews.get(0);
-			setBitmap();
-			fetchViewPosition(tab);
-		}
-
-		if (notification == Task.Notification.TAB_SOUNDS) {
-			Activity currentActivity = ((Activity) context).getParent();
-			TabHost tabHost = (TabHost) currentActivity.findViewById(android.R.id.tabhost);
-			ArrayList<View> tabViews = tabHost.getTouchables();
-			LinearLayout tab = (LinearLayout) tabViews.get(2);
-			setBitmap();
-			fetchViewPosition(tab);
-		}
-
-		updateCloudPosition();
+	public void addYourselfToTutorialOverlay(TutorialOverlay tutorialOverlay) {
+		tutorialOverlay.addCloud(this);
 	}
 
-	void setBitmap() {
-		drawableInnerPart = context.getResources().getDrawable(R.drawable.cloud_inner_part);
-		drawableOuterPartRight = context.getResources().getDrawable(R.drawable.cloud_outer_part);
-		drawableOuterPartLeft = context.getResources().getDrawable(R.drawable.cloud_outer_part);
-		drawableOuterPartTop = context.getResources().getDrawable(R.drawable.cloud_outer_part);
-		drawableOuterPartBottom = context.getResources().getDrawable(R.drawable.cloud_outer_part);
-	}
-
-	void updateCloudPosition() {
-		focusX1 = originalFocusX1 - animationOffsetX;
-		focusY1 = originalFocusY1 - animationOffsetY;
-		focusX2 = originalFocusX2 + animationOffsetX;
-		focusY2 = originalFocusY2 + animationOffsetY;
-
-		Rect bounds = new Rect();
-		bounds.set(focusX1, focusY1, focusX2, focusY2);
-		drawableInnerPart.setBounds(bounds);
-
-		Rect boundsOuterRight = new Rect();
-		boundsOuterRight.set(focusX2, focusY1, Values.SCREEN_WIDTH, focusY2);
-		drawableOuterPartRight.setBounds(boundsOuterRight);
-
-		Rect boundsOuterLeft = new Rect();
-		boundsOuterLeft.set(0, focusY1, focusX1, focusY2);
-		drawableOuterPartLeft.setBounds(boundsOuterLeft);
-
-		Rect boundsOuterTop = new Rect();
-		boundsOuterTop.set(0, 0, Values.SCREEN_WIDTH, focusY1);
-		drawableOuterPartTop.setBounds(boundsOuterTop);
-
-		Rect boundsOuterBottom = new Rect();
-		boundsOuterBottom.set(0, focusY2, Values.SCREEN_WIDTH, Values.SCREEN_HEIGHT);
-		drawableOuterPartBottom.setBounds(boundsOuterBottom);
-	}
-
-	void fetchViewPosition(View view) {
-		int location[] = new int[2];
-		view.getLocationOnScreen(location);
-
-		int width = view.getWidth();
-		int height = view.getHeight();
-		originalFocusX1 = location[0];
-		originalFocusY1 = location[1];
-		originalFocusX2 = location[0] + width;
-		originalFocusY2 = location[1] + height;
-	}
-
-	public void clearCloud() {
-		originalFocusX1 = -1;
-		originalFocusY1 = -1;
-		originalFocusX2 = -1;
-		originalFocusY2 = -1;
-	}
-
-	public void update(long gameTime) {
-		if (originalFocusX1 != -1) {
-			if (updateAfterMilliseconds < (gameTime - timeOfLastUpdate)) {
-				timeOfLastUpdate = gameTime;
-
-				if (stateOfAnimation == 0) {
-					animationOffsetX = 0;
-					animationOffsetY = 0;
-					stateOfAnimation = 1;
-				} else if (stateOfAnimation == 1) {
-					animationOffsetX = originalFocusX2 - originalFocusX1;
-					animationOffsetX = (animationOffsetX / 100) * 5;
-					animationOffsetY = originalFocusY2 - originalFocusY1;
-					animationOffsetY = (animationOffsetY / 100) * 5;
-					stateOfAnimation = 2;
-				} else if (stateOfAnimation == 2) {
-					animationOffsetX = originalFocusX2 - originalFocusX1;
-					animationOffsetX = (animationOffsetX / 100) * 10;
-					animationOffsetY = originalFocusY2 - originalFocusY1;
-					animationOffsetY = (animationOffsetY / 100) * 10;
-					stateOfAnimation = 0;
-				}
-			}
-			updateCloudPosition();
-		}
-	}
-
+	@Override
 	public void draw(Canvas canvas) {
-
-		if (originalFocusX1 != -1) {
-			drawableInnerPart.draw(canvas);
-			drawableOuterPartRight.draw(canvas);
-			drawableOuterPartLeft.draw(canvas);
-			drawableOuterPartTop.draw(canvas);
-			drawableOuterPartBottom.draw(canvas);
+		//	Log.i("faxxe", "Cloud: draw!" + alpha);
+		int height = ((Activity) context).getWindowManager().getDefaultDisplay().getHeight();
+		int width = ((Activity) context).getWindowManager().getDefaultDisplay().getWidth();
+		paint.setColor(Color.GRAY);
+		paint.setAlpha(alpha);
+		Path path = new Path();
+		path.moveTo(0, 0);
+		path.lineTo(width, 0);
+		path.lineTo(width, height);
+		path.lineTo(0, height);
+		path.lineTo(0, 0);
+		if (alpha > targetAlpha) {
+			alpha -= 2;
 		}
+		if (visible) {
+			path.addCircle((int) actX, (int) actY, radius, Direction.CCW);
+		}
+		canvas.drawPath(path, paint);
+
+		updateXY();
+
 	}
 
-	private int getRelativeLeft(View myView) {
-		if (myView.getParent() == myView.getRootView()) {
-			return myView.getLeft();
-		} else {
-			return myView.getLeft() + getRelativeLeft((View) myView.getParent());
+	public void updateXY() {
+		//fix the following 6 lines for all directions!
+		float deltax = sollX;
+		float deltay = sollY;
+		double dist = Math.sqrt(sollX * sollX + sollY * sollY);
+		dist /= 7;
+		deltax /= dist;
+		deltay /= dist;
+
+		if (actX < sollX) {
+			actX += deltax;
 		}
+		if (actY < sollY) {
+			actY += deltay;
+		}
+
 	}
 
-	private int getRelativeTop(View myView) {
-		if (myView.getParent() == myView.getRootView()) {
-			return myView.getTop();
-		} else {
-			return myView.getTop() + getRelativeTop((View) myView.getParent());
-		}
+	public void fadeTo(ClickableArea ca) {
+		this.clickableArea = ca;
+		this.sollX = ca.centerX;
+		this.sollY = ca.centerY;
+		actX = 0;
+		actY = 0;
+		startX = 0;
+		startY = 0;
+	}
+
+	public void fadeIn() {
+		this.targetAlpha = 175;
+	}
+
+	public void fadeOut() {
+		this.targetAlpha = 255;
+	}
+
+	public void jumpTo(ClickableArea ca) {
+		this.clickableArea = ca;
+		this.actX = ca.centerX;
+		this.actY = ca.centerY;
+		this.startX = ca.centerX;
+		this.startY = ca.centerY;
+	}
+
+	public void disappear() {
+		this.visible = false;
+		this.sollX = 0;
+		this.sollY = 0;
+
+	}
+
+	public void show() {
+		this.visible = true;
+	}
+
+	public void setRadius(int radius) {
+		this.radius = radius;
+	}
+
+	public ClickableArea getClickableArea() {
+		return this.clickableArea;
 	}
 }

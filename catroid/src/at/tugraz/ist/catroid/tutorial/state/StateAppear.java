@@ -18,15 +18,14 @@
  */
 package at.tugraz.ist.catroid.tutorial.state;
 
-import java.util.HashMap;
-
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import at.tugraz.ist.catroid.R;
-import at.tugraz.ist.catroid.tutorial.Tutor;
 import at.tugraz.ist.catroid.tutorial.Tutorial;
+import at.tugraz.ist.catroid.tutorial.tasks.Task;
+import at.tugraz.ist.catroid.tutorial.tasks.Task.Tutor;
 
 /**
  * @author User
@@ -34,19 +33,19 @@ import at.tugraz.ist.catroid.tutorial.Tutorial;
  */
 public class StateAppear implements State {
 	private StateController controller;
-	private static HashMap<Tutor.TutorType, StateAppear> instances;
+	private static StateAppear instance;
 	private Resources resources;
 	Bitmap bitmaps_portal[];
 
 	int currentFrame;
 	int frameCount;
-	Tutor.TutorType tutorType;
+	Task.Tutor tutorType;
 
-	private StateAppear(StateController controller, Resources resources, Tutor.TutorType tutorType) {
+	private StateAppear(StateController controller, Resources resources, Task.Tutor tutorType) {
 		this.controller = controller;
 		this.resources = resources;
 		bitmaps_portal = new Bitmap[5];
-		if (tutorType.compareTo(Tutor.TutorType.CAT_TUTOR) == 0) {
+		if (tutorType.compareTo(Tutor.CAT) == 0) {
 			bitmaps_portal[0] = BitmapFactory.decodeResource(resources, R.drawable.simons_cat_portal_5);
 			bitmaps_portal[1] = BitmapFactory.decodeResource(resources, R.drawable.simons_cat_portal_4);
 			bitmaps_portal[2] = BitmapFactory.decodeResource(resources, R.drawable.simons_cat_portal_3);
@@ -73,20 +72,17 @@ public class StateAppear implements State {
 		return (this.getClass().getSimpleName());
 	}
 
-	public static State enter(StateController controller, Resources resources, Tutor.TutorType tutorType) {
+	public static State enter(StateController controller, Resources resources, Task.Tutor tutorType) {
 		Log.i("catroid", "State Appear");
-		if (instances == null) {
-			instances = new HashMap<Tutor.TutorType, StateAppear>();
-		}
-		if (!instances.containsKey(tutorType)) {
-			instances.put(tutorType, new StateAppear(controller, resources, tutorType));
+		if (instance == null) {
+			instance = new StateAppear(controller, resources, tutorType);
 		}
 		controller.setDisappeared(false);
-		return (instances.get(tutorType));
+		return instance;
 	}
 
 	@Override
-	public Bitmap updateAnimation(Tutor.TutorType tutorType) {
+	public Bitmap updateAnimation(Task.Tutor tutorType) {
 		Log.i("catroid", "Appear_update: " + currentFrame + " " + tutorType.toString());
 		if (currentFrame < (frameCount - 1)) {
 			currentFrame++;
@@ -96,6 +92,8 @@ public class StateAppear implements State {
 			Tutorial tut = Tutorial.getInstance(null);
 			tut.setNotification("AppearDone");
 			controller.setDisappeared(false);
+			resetState();
+			return (bitmaps_portal[currentFrame]);
 		}
 		return (bitmaps_portal[currentFrame]);
 	}

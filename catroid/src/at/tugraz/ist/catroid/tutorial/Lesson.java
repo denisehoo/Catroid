@@ -1,7 +1,9 @@
 package at.tugraz.ist.catroid.tutorial;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import android.util.Log;
 import at.tugraz.ist.catroid.tutorial.tasks.Task;
 
 public class Lesson {
@@ -13,6 +15,14 @@ public class Lesson {
 	Lesson() {
 	}
 
+	public void clean() {
+		lessonContent.clear();
+
+	}
+
+	//	public void insertTask(Task task){
+	//		lessonContent.add(currentStep, task);
+	//	}
 	public int getCurrentStep() {
 		return currentStep;
 	}
@@ -22,13 +32,13 @@ public class Lesson {
 	}
 
 	public void cleanAfterXML() {
-		if (lessonContent.size() > 0) {
-			lessonContent.remove(0);
-		}
+		//		if (lessonContent.size() > 0) {
+		//			lessonContent.remove(0);
+		//		}
 	}
 
 	boolean forwardStep() {
-		if ((currentStep + 1) >= lessonContent.size()) {
+		if ((currentStep) + 1 >= lessonContent.size()) {
 			// TODO: da ghoert naechste Lesson
 			// TODO: da stimmt was nicht, das +1 sollte nicht noetig sein
 
@@ -49,8 +59,10 @@ public class Lesson {
 		}
 	}
 
-	String executeTask(TutorialOverlay tutorialOverlay) {
-		return (lessonContent.get(currentStep).execute(tutorialOverlay));
+	//	String executeTask(NewTutorialOverlay tutorialOverlay) {
+	boolean executeTask(HashMap<Task.Tutor, SurfaceObjectTutor> tutors) {
+		Log.i("faxxe", "executing: " + lessonContent.get(currentStep).toString());
+		return (lessonContent.get(currentStep).execute(tutors));
 		//		if (notification != null) {
 		//			try {
 		//				waitForNotification(notification);

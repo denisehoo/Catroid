@@ -1,12 +1,17 @@
 package at.tugraz.ist.catroid.tutorial;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+
+import android.util.Log;
+import at.tugraz.ist.catroid.tutorial.tasks.Task;
 
 public class LessonCollection {
 	private ArrayList<Lesson> lessonArray;
 	private int currentLesson;
 	private int currentPossibleLesson;
 	private TutorialOverlay tutorialOverlay;
+	private HashMap<Task.Tutor, SurfaceObjectTutor> tutors;
 
 	public void setTutorialOverlay(TutorialOverlay tutorialOverlay) {
 		this.tutorialOverlay = tutorialOverlay;
@@ -17,9 +22,9 @@ public class LessonCollection {
 	}
 
 	public void cleanAfterXML() {
-		for (int i = 0; i < lessonArray.size(); i++) {
-			lessonArray.get(i).cleanAfterXML();
-		}
+		//		for (int i = 0; i < lessonArray.size(); i++) {
+		//			lessonArray.get(i).cleanAfterXML();
+		//		}
 	}
 
 	LessonCollection() {
@@ -42,8 +47,9 @@ public class LessonCollection {
 		}
 	}
 
-	String executeTask() {
-		return (lessonArray.get(currentLesson).executeTask(tutorialOverlay));
+	boolean executeTask() {
+		//		return (lessonArray.get(currentLesson).executeTask(tutorialOverlay));
+		return (lessonArray.get(currentLesson).executeTask(tutors));
 	}
 
 	boolean nextLesson() {
@@ -89,6 +95,26 @@ public class LessonCollection {
 
 	boolean forwardStep() {
 		return (lessonArray.get(currentLesson).forwardStep());
+	}
+
+	public void setTutors(HashMap<Task.Tutor, SurfaceObjectTutor> tutors) {
+		this.tutors = tutors;
+	}
+
+	public void clean() {
+		Log.i("faxxe", "LessonCollection: clean called!");
+		for (Lesson lesson : lessonArray) {
+			lesson.clean();
+		}
+		tutors.clear();
+		tutors = null;
+	}
+
+	@Override
+	protected void finalize() throws Throwable {
+		// TODO Auto-generated method stub
+		Log.i("faxxe", "LessonCollection: finalize called!");
+		super.finalize();
 	}
 
 }

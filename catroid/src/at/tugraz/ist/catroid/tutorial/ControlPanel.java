@@ -35,7 +35,7 @@ import at.tugraz.ist.catroid.R;
  * @author Pinki
  * 
  */
-public class ControlPanel {
+public class ControlPanel implements SurfaceObject {
 
 	//ein paar gedanken zum control panel
 	//play / pause panel je nach status abwechseln
@@ -65,16 +65,16 @@ public class ControlPanel {
 	private boolean open;
 	Tutorial tut;
 
-	public ControlPanel(Resources resources, Context context) {
+	public ControlPanel(Context context) {
 		active = true;
-		tut = Tutorial.getInstance(context);
-		this.resources = resources;
+		tut = Tutorial.getInstance(null);
+		this.resources = ((Activity) context).getResources();
 		this.context = context;
 		play = resources.getDrawable(R.drawable.play_tutorial);
 		pause = resources.getDrawable(R.drawable.pause_tutorial);
 		forward = resources.getDrawable(R.drawable.forward_tutorial);
-		backward = resources.getDrawable(R.drawable.button_bar_tutorial_stop);
-		circle = resources.getDrawable(R.drawable.panel_circle);
+		backward = resources.getDrawable(R.drawable.tutorial_menu_open_inactive);
+		circle = resources.getDrawable(R.drawable.circle_panel);
 
 		bounds = new Rect();
 		menuBounds = new Rect();
@@ -87,6 +87,7 @@ public class ControlPanel {
 		open = false;
 	}
 
+	@Override
 	public void draw(Canvas canvas) {
 		Paint paint = new Paint();
 		if (open) {
@@ -179,6 +180,17 @@ public class ControlPanel {
 	public void pressBackward() {
 		Toast toast = Toast.makeText(context, "BACKWARD", Toast.LENGTH_SHORT);
 		toast.show();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see at.tugraz.ist.catroid.tutorial.SurfaceObject#update(long)
+	 */
+	@Override
+	public void update(long gameTime) {
+		// TODO Auto-generated method stub
+
 	}
 
 }

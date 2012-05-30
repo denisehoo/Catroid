@@ -18,15 +18,13 @@
  */
 package at.tugraz.ist.catroid.tutorial.state;
 
-import java.util.HashMap;
-
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import at.tugraz.ist.catroid.R;
-import at.tugraz.ist.catroid.tutorial.Tutor;
 import at.tugraz.ist.catroid.tutorial.Tutorial;
+import at.tugraz.ist.catroid.tutorial.tasks.Task;
 
 /**
  * @author User
@@ -35,7 +33,7 @@ import at.tugraz.ist.catroid.tutorial.Tutorial;
 public class StateJump implements State {
 	public String stateName = this.getClass().getSimpleName();
 	private StateController controller;
-	private static HashMap<Tutor.TutorType, StateJump> instances;
+	private static StateJump instance;
 	private Resources resources;
 	Bitmap bitmaps_portal[];
 
@@ -49,11 +47,11 @@ public class StateJump implements State {
 		return (this.getClass().getSimpleName());
 	}
 
-	private StateJump(StateController controller, Resources resources, Tutor.TutorType tutorType) {
+	private StateJump(StateController controller, Resources resources, Task.Tutor tutorType) {
 		this.controller = controller;
 		this.resources = resources;
 		bitmaps_portal = new Bitmap[5];
-		if (tutorType.compareTo(Tutor.TutorType.CAT_TUTOR) == 0) {
+		if (tutorType.compareTo(Task.Tutor.CAT) == 0) {
 			bitmaps_portal[0] = BitmapFactory.decodeResource(resources, R.drawable.simons_cat_portal_1);
 			bitmaps_portal[1] = BitmapFactory.decodeResource(resources, R.drawable.simons_cat_portal_2);
 			bitmaps_portal[2] = BitmapFactory.decodeResource(resources, R.drawable.simons_cat_portal_3);
@@ -77,20 +75,17 @@ public class StateJump implements State {
 		notificated = false;
 	}
 
-	public static State enter(StateController controller, Resources resources, Tutor.TutorType tutorType) {
+	public static State enter(StateController controller, Resources resources, Task.Tutor tutorType) {
 		Log.i("catroid", "State Appear");
-		if (instances == null) {
-			instances = new HashMap<Tutor.TutorType, StateJump>();
-		}
-		if (!instances.containsKey(tutorType)) {
-			instances.put(tutorType, new StateJump(controller, resources, tutorType));
+		if (instance == null) {
+			instance = new StateJump(controller, resources, tutorType);
 		}
 		controller.setDisappeared(false);
-		return (instances.get(tutorType));
+		return instance;
 	}
 
 	@Override
-	public Bitmap updateAnimation(Tutor.TutorType tutorType) {
+	public Bitmap updateAnimation(Task.Tutor tutorType) {
 		if (portAway) {
 			if (currentFrame < (frameCount - 1)) {
 				currentFrame++;
@@ -105,6 +100,7 @@ public class StateJump implements State {
 				controller.changeState(StateIdle.enter(controller, resources, tutorType));
 				Tutorial tut = Tutorial.getInstance(null);
 				tut.setNotification("JumpDone");
+				resetState();
 			}
 		}
 		return (bitmaps_portal[currentFrame]);

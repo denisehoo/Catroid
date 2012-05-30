@@ -48,7 +48,7 @@ public class NewSpriteDialog extends TextDialog {
 			return;
 		}
 
-		Tutorial tutorial = Tutorial.getInstance(projectActivity.getApplicationContext());
+		Tutorial tutorial = Tutorial.getInstance(null);
 		tutorial.setNotification("DialogDone");
 
 		Sprite sprite = new Sprite(spriteName);
@@ -59,6 +59,7 @@ public class NewSpriteDialog extends TextDialog {
 		activity.dismissDialog(ProjectActivity.DIALOG_NEW_SPRITE);
 	}
 
+<<<<<<< HEAD
 	//<<<<<<< HEAD
 	//	private void initKeyListener(AlertDialog.Builder builder) {
 	//		builder.setOnCancelListener(new OnCancelListener() {
@@ -77,6 +78,22 @@ public class NewSpriteDialog extends TextDialog {
 	private void initKeyAndClickListener() {
 		dialog.setOnKeyListener(new OnKeyListener() {
 			//>>>>>>> origin/master
+=======
+	private void initKeyListener(AlertDialog.Builder builder) {
+		builder.setOnCancelListener(new OnCancelListener() {
+
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				Tutorial tutorial = Tutorial.getInstance(projectActivity.getApplicationContext());
+				tutorial.rewindStep();
+				tutorial.rewindStep();
+				tutorial.setNotification("DialogDone");
+			}
+		});
+
+		builder.setOnKeyListener(new OnKeyListener() {
+			@Override
+>>>>>>> 965854f90fed51ac342248cf150d98cdb07b8b51
 			public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
 				if (event.getAction() == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
 					String newSpriteName = (input.getText().toString()).trim();
@@ -84,10 +101,14 @@ public class NewSpriteDialog extends TextDialog {
 
 						Utils.displayErrorMessage(projectActivity,
 								projectActivity.getString(R.string.spritename_already_exists));
+<<<<<<< HEAD
 						Tutorial tutorial = Tutorial.getInstance(projectActivity.getApplicationContext());
 						tutorial.setNotification("DialogDone");
 						Utils.displayErrorMessage(activity, activity.getString(R.string.spritename_already_exists));
 
+=======
+						Tutorial.getInstance(null).setNotification("DialogDone");
+>>>>>>> 965854f90fed51ac342248cf150d98cdb07b8b51
 					} else {
 						handleOkButton();
 						return true;
@@ -97,6 +118,7 @@ public class NewSpriteDialog extends TextDialog {
 			}
 		});
 
+<<<<<<< HEAD
 		buttonPositive.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				handleOkButton();
@@ -107,6 +129,33 @@ public class NewSpriteDialog extends TextDialog {
 			public void onClick(View v) {
 				input.setText(null);
 				activity.dismissDialog(ProjectActivity.DIALOG_NEW_SPRITE);
+=======
+		dialog.setOnShowListener(new OnShowListener() {
+			@Override
+			public void onShow(DialogInterface dialog) {
+				InputMethodManager inputManager = (InputMethodManager) projectActivity
+						.getSystemService(Context.INPUT_METHOD_SERVICE);
+				inputManager.showSoftInput(input, InputMethodManager.SHOW_IMPLICIT);
+			}
+		});
+
+		input.addTextChangedListener(new TextWatcher() {
+			@Override
+			public void onTextChanged(CharSequence s, int start, int before, int count) {
+				if (s.length() == 0 || (s.length() == 1 && s.charAt(0) == '.')) {
+					buttonPositive.setEnabled(false);
+				} else {
+					buttonPositive.setEnabled(true);
+				}
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+			}
+
+			@Override
+			public void afterTextChanged(Editable s) {
+>>>>>>> 965854f90fed51ac342248cf150d98cdb07b8b51
 			}
 		});
 	}

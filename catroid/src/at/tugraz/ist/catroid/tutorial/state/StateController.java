@@ -21,7 +21,8 @@ package at.tugraz.ist.catroid.tutorial.state;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.util.Log;
-import at.tugraz.ist.catroid.tutorial.Tutor;
+import at.tugraz.ist.catroid.tutorial.SurfaceObjectTutor;
+import at.tugraz.ist.catroid.tutorial.tasks.Task;
 
 /**
  * @author User
@@ -30,12 +31,12 @@ import at.tugraz.ist.catroid.tutorial.Tutor;
 public class StateController {
 
 	private State state;
-	public Tutor tutor;
+	public SurfaceObjectTutor tutor;
 	private boolean disappeared;
 
-	public StateController(Resources resources, Tutor tutor) {
-		state = StateIdle.enter(this, resources, tutor.tutorType);
+	public StateController(Resources resources, SurfaceObjectTutor tutor) {
 		this.tutor = tutor;
+		state = StateIdle.enter(this, resources, tutor.tutorType);
 		disappeared = true;
 	}
 
@@ -45,6 +46,7 @@ public class StateController {
 
 	public void changeState(State state) {
 		Log.i("catroid", "change State to: " + state.getStateName() + "on Tutor: " + tutor.tutorType.toString());
+		this.state = null;
 		this.state = state;
 		this.state.resetState();
 	}
@@ -57,7 +59,7 @@ public class StateController {
 		this.disappeared = disappeared;
 	}
 
-	public Bitmap updateAnimation(Tutor.TutorType tutorType) {
+	public Bitmap updateAnimation(Task.Tutor tutorType) {
 		return (this.state.updateAnimation(tutorType));
 	}
 

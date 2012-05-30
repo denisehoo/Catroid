@@ -31,7 +31,7 @@ import at.tugraz.ist.catroid.tutorial.tasks.Task;
  * @author faxxe
  * 
  */
-public class Tutor extends SurfaceObjectTutor implements SurfaceObject {
+public class NewTutor extends SurfaceObjectTutor implements SurfaceObject {
 
 	private Context context;
 	private TutorialOverlay tutorialOverlay;
@@ -43,13 +43,13 @@ public class Tutor extends SurfaceObjectTutor implements SurfaceObject {
 	private int maxSteps = 0;
 	private long timeStamp = 0;
 	private Paint paint;
-	private int sizeX = 110;
-	private int sizeY = 94;
+	private int sizeX = 100;
+	private int sizeY = 100;
 	private int line = 0;
 	private int targetX;
 	private int targetY;
 
-	public Tutor(int drawable, TutorialOverlay tutorialOverlay) {
+	public NewTutor(int drawable, TutorialOverlay tutorialOverlay) {
 		super(Tutorial.getInstance(null).getActualContext(), tutorialOverlay);
 		context = Tutorial.getInstance(null).getActualContext();
 		ressources = context.getResources();
@@ -58,7 +58,7 @@ public class Tutor extends SurfaceObjectTutor implements SurfaceObject {
 		this.tutorialOverlay = tutorialOverlay;
 	}
 
-	public Tutor(int drawable, TutorialOverlay tutorialOverlay, int x, int y, Task.Tutor tutorType) {
+	public NewTutor(int drawable, TutorialOverlay tutorialOverlay, int x, int y, Task.Tutor tutorType) {
 		super(Tutorial.getInstance(null).getActualContext(), tutorialOverlay);
 		context = Tutorial.getInstance(null).getActualContext();
 		ressources = context.getResources();
@@ -84,8 +84,7 @@ public class Tutor extends SurfaceObjectTutor implements SurfaceObject {
 	@Override
 	public void say(String text) {
 		Log.i("faxxe", "NewTutor: " + text);
-		new Bubble(text, tutorialOverlay, this, targetX - 20, targetY - 90);
-		state = 1;
+		new NewBubble(text, tutorialOverlay, this);
 	}
 
 	@Override
@@ -105,8 +104,7 @@ public class Tutor extends SurfaceObjectTutor implements SurfaceObject {
 
 	@Override
 	public void disappear() {
-		Log.i("faxxe", "disappearing...");
-		state = 2;
+
 	}
 
 	@Override
@@ -121,48 +119,38 @@ public class Tutor extends SurfaceObjectTutor implements SurfaceObject {
 
 	@Override
 	public void sayFinished() {
-		state = 3;
+
 	}
 
 	@Override
 	public void draw(Canvas canvas) {
 		Bitmap todraw = Bitmap.createBitmap(bitmap, 0, 0, 100, 100);
-		if (currentStep >= 6) {
+		if (currentStep == 6) {
 			currentStep = 0;
 		}
 		switch (state) {
 			case 1:
 
-				todraw = Bitmap.createBitmap(bitmap, currentStep * sizeX, state * sizeY, sizeX, sizeY);
+				todraw = Bitmap.createBitmap(bitmap, currentStep * sizeX, state * 100, 100, 100);
 				break;
 			case 0:
 				if (currentStep == 5) {
-					state = 3;
+					state = 1;
 					Tutorial.getInstance(null).setNotification("appear done!");
 				}
-				todraw = Bitmap.createBitmap(bitmap, currentStep * sizeX, state * sizeY, sizeX, sizeY);
+				todraw = Bitmap.createBitmap(bitmap, currentStep * sizeX, state * 100, 100, 100);
 				break;
-			case 9:
+			case 2:
 				if (currentStep == 6) {
 					currentStep = 0;
 				}
-				todraw = Bitmap.createBitmap(bitmap, currentStep * sizeX, state * sizeY, sizeX, sizeY);
+				todraw = Bitmap.createBitmap(bitmap, currentStep * sizeX, state * 100, 100, 100);
 				break;
 			case 3:
 				if (currentStep == 6) {
 					currentStep = 0;
 				}
-				todraw = Bitmap.createBitmap(bitmap, currentStep * sizeX, state * sizeY, sizeX, sizeY);
-				break;
-			case 2:
-				if (currentStep == 5) {
-					currentStep = 0;
-					state = 92;
-					Tutorial.getInstance(null).setNotification("disappear done!");
-					break;
-				}
-				Log.i("faxxe", "at diaperation..");
-				todraw = Bitmap.createBitmap(bitmap, currentStep * sizeX, state * sizeY, sizeX, sizeY);
+				todraw = Bitmap.createBitmap(bitmap, currentStep * sizeX, state * 100, 100, 100);
 				break;
 
 			default:
@@ -176,7 +164,7 @@ public class Tutor extends SurfaceObjectTutor implements SurfaceObject {
 	@Override
 	public void update(long gameTime) {
 		currentFrame++;
-		if (currentFrame % 5 == 0) {
+		if (currentFrame % 10 == 0) {
 			currentStep++;
 
 		}

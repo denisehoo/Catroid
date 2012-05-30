@@ -26,10 +26,10 @@ import at.tugraz.ist.catroid.tutorial.tasks.TaskNotification;
  * @author faxxe
  * 
  */
-public class ClickDispatcher {
+public class ClickDispatcherV2 {
 	private LayoutExaminer le;
 
-	public ClickDispatcher() {
+	public ClickDispatcherV2() {
 		le = new LayoutExaminer();
 	}
 

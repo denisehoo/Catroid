@@ -1,10 +1,12 @@
 package at.tugraz.ist.catroid.tutorial.tasks;
 
-import at.tugraz.ist.catroid.tutorial.TutorialOverlay;
+import java.util.HashMap;
+
+import at.tugraz.ist.catroid.tutorial.SurfaceObjectTutor;
 
 public interface Task {
 
-	public enum Type {
+	public static enum Type {
 		JUMP, APPEAR, DISAPPEAR, SAY, FLIP, POINT, NOTIFICATION, SLEEP
 	}
 
@@ -25,12 +27,12 @@ public interface Task {
 		/**/
 		SOUNDS_ADD_SOUND, SOUNDS_PLAY, SOUNDS_RENAME, SOUNDS_DELETE,
 		/**/
-		BRICK_CATEGORY_DIALOG, BRICK_ADD_DIALOG, BRICK_CATEGORY_CONTROL, BRICK_CATEGORY_LOOKS, BRICK_CATEGORY_SOUND, BRICK_CATEGORY_MOTION,
+		BRICK_CATEGORY_DIALOG, BRICK_ADD_DIALOG, BRICK_CATEGORY_CONTROL, BRICK_CATEGORY_LOOKS, BRICK_CATEGORY_SOUND, BRICK_CATEGORY_MOTION, BRICK_DIALOG_DONE,
 		/**/
 		IF_PROJECT_STARTED, WAIT_SECONDS, IF, REPEAT, REPEAT_TIMES, SET_COSTUME
 	}
 
-	public String execute(TutorialOverlay tutorialOverlay);
+	public boolean execute(HashMap<Task.Tutor, SurfaceObjectTutor> tutors);
 
 	public Type getType();
 

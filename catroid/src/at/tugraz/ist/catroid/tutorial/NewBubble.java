@@ -23,13 +23,14 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.NinePatchDrawable;
+import android.util.Log;
 import at.tugraz.ist.catroid.R;
 
 /**
  * @author faxxe
  * 
  */
-public class Bubble implements SurfaceObject {
+public class NewBubble implements SurfaceObject {
 	private String text = " So, donn woll !";
 	private int currentPosition = 0;
 	private int frames = 0;
@@ -41,26 +42,20 @@ public class Bubble implements SurfaceObject {
 	private String textToDraw = "";
 	private String[] textArray = { "", "", "", "", "", "", "", "", "" };
 	private int currentLine = 0;
-	private int minWidth = 100;
-	private int x = 0;
-	private int y = 0;
-	private int textSize = 16;
 
-	public Bubble(String text, TutorialOverlay tutorialOverlay, SurfaceObjectTutor tutor, int x, int y) {
+	public NewBubble(String text, TutorialOverlay tutorialOverlay, SurfaceObjectTutor tutor) {
 		this.tutor = tutor;
 		this.text = text;
-		this.x = x;
-		this.y = y;
+		Log.i("faxxe", "text to draw: " + text);
 		tutorialOverlay.addSurfaceObject(this);
 		this.tutorialOverlay = tutorialOverlay;
 		speechBubble = (NinePatchDrawable) Tutorial.getInstance(null).getActualContext().getResources()
-				.getDrawable(R.drawable.bubble);
-
+				.getDrawable(R.drawable.speech_bubble);
 		bounds = new Rect();
-		bounds.top = y;
-		bounds.left = x;
-		//		bounds.bottom = ;
-		bounds.right = bounds.left + minWidth;
+		bounds.top = 80;
+		bounds.left = 80;
+		bounds.bottom = 300;
+		bounds.right = 150;
 		speechBubble.setBounds(bounds);
 	}
 
@@ -68,16 +63,16 @@ public class Bubble implements SurfaceObject {
 	public void draw(Canvas canvas) {
 		Paint paint = new Paint();
 		paint.setFakeBoldText(true);
-		paint.setTextSize(textSize);
-		if (currentLine < 4) {
-			if (bounds.right < bounds.left + 10 * textArray[currentLine].length()) {
-				bounds.right = bounds.left + 10 * textArray[currentLine].length();
+		paint.setTextSize(16);
+		if (currentPosition < text.length() && currentLine < 5) {
+			if (bounds.right < bounds.left + 50 + 8 * textArray[currentLine].length()) {
+				bounds.right = bounds.left + 50 + 8 * textArray[currentLine].length();
 			}
-			bounds.bottom = 70 + bounds.top + 14 * currentLine + 1;
+			bounds.bottom = 70 + bounds.top + 10 * currentLine + 1;
 			speechBubble.setBounds(bounds);
 			speechBubble.draw(canvas);
 			for (int i = 0; i < 8; i++) {
-				canvas.drawText(textArray[i], x + textSize, y + 20 + i * textSize, paint);
+				canvas.drawText(textArray[i], 100, 100 + i * 15, paint);
 			}
 		}
 	}
@@ -85,21 +80,35 @@ public class Bubble implements SurfaceObject {
 	@Override
 	public void update(long gameTime) {
 		frames++;
-		if (currentPosition < text.length() && currentLine < 8) {
+		if (currentPosition < text.length() - 1 && currentLine < 8) {
 			if (frames % 6 == 0) {
+				currentPosition++;
+				//				frames = 0;
 				if (currentPosition > 20 * (currentLine + 1) && text.charAt(currentPosition) == ' ') {
 					currentLine++;
 				}
 
 				textArray[currentLine] = textArray[currentLine] + text.charAt(currentPosition);
-				currentPosition++;
 			}
 		}
-		if (frames == 15 * text.length()) {
+		if (frames == 10 * text.length()) {
 			tutor.idle();
 			tutorialOverlay.removeSurfaceObject(this);
-			Tutorial.getInstance(null).setNotification("Bubble finished!");
+			Tutorial.getInstance(null).setNotification("blafasel");
 		}
 
 	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.lang.Object#finalize()
+	 */
+	@Override
+	protected void finalize() throws Throwable {
+		// TODO Auto-generated method stub
+		super.finalize();
+		tutorialOverlay.removeSurfaceObject(this);
+	}
+
 }

@@ -47,6 +47,7 @@ import at.tugraz.ist.catroid.bluetooth.BluetoothManager;
 import at.tugraz.ist.catroid.bluetooth.DeviceListActivity;
 import at.tugraz.ist.catroid.content.Sprite;
 import at.tugraz.ist.catroid.content.bricks.Brick;
+import at.tugraz.ist.catroid.tutorial.Tutorial;
 
 public class PreStageActivity extends Activity {
 
@@ -65,6 +66,7 @@ public class PreStageActivity extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		Tutorial.getInstance(null).stopButtonTutorial();
 		super.onCreate(savedInstanceState);
 
 		int required_resources = getRequiredRessources();
@@ -81,9 +83,31 @@ public class PreStageActivity extends Activity {
 			mask = mask << 1;
 		}
 		if ((required_resources & Brick.TEXT_TO_SPEECH) > 0) {
+<<<<<<< HEAD
 			Intent checkIntent = new Intent();
 			checkIntent.setAction(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
 			startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
+=======
+			textToSpeech = new TextToSpeech(this.getApplicationContext(), new OnInitListener() {
+				@Override
+				public void onInit(int status) {
+					resourceInitialized();
+					if (status == TextToSpeech.ERROR) {
+						Toast.makeText(PreStageActivity.this,
+								"Error occurred while initializing Text-To-Speech engine", Toast.LENGTH_LONG).show();
+						resourceFailed();
+					}
+				}
+			});
+
+			if (textToSpeech.isLanguageAvailable(Locale.getDefault()) == TextToSpeech.LANG_MISSING_DATA) {
+				Intent installIntent = new Intent();
+				installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+				startActivity(installIntent);
+				resourceFailed();
+			}
+			;
+>>>>>>> 965854f90fed51ac342248cf150d98cdb07b8b51
 		}
 		if ((required_resources & Brick.BLUETOOTH_LEGO_NXT) > 0) {
 			BluetoothManager bluetoothManager = new BluetoothManager(this);
