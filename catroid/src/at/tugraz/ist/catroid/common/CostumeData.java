@@ -22,8 +22,6 @@
  */
 package at.tugraz.ist.catroid.common;
 
-import java.io.File;
-
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import at.tugraz.ist.catroid.ProjectManager;
@@ -32,62 +30,62 @@ import at.tugraz.ist.catroid.utils.Utils;
 
 public class CostumeData {
 
-	private String costumeName;
-	private String costumeFileName;
+	private String name;
+	private String fileName;
 	private transient Bitmap thumbnailBitmap;
-	private Integer resWidth;
-	private Integer resHeight;
-	private Long sizeInKB;
+	private transient Integer width;
+	private transient Integer height;
 	private transient static final int THUMBNAIL_WIDTH = 150;
 	private transient static final int THUMBNAIL_HEIGHT = 150;
 
 	public String getAbsolutePath() {
-		if (costumeFileName != null) {
-			return Utils.buildPath(getPathWithoutFileName(), costumeFileName);
+		if (fileName != null) {
+			return Utils.buildPath(getPathToImageDirectory(), fileName);
+		} else {
+			return null;
+		}
+	}
+
+	public String getInternalPath() {
+		if (fileName != null) {
+			return Constants.IMAGE_DIRECTORY + "/" + fileName;
 		} else {
 			return null;
 		}
 	}
 
 	public String getCostumeName() {
-		return costumeName;
+		return name;
 	}
 
 	public void setCostumeName(String name) {
-		this.costumeName = name;
+		this.name = name;
 	}
 
 	public void setCostumeFilename(String fileName) {
-		this.costumeFileName = fileName;
+		this.fileName = fileName;
 	}
 
 	public String getCostumeFileName() {
-		return costumeFileName;
+		return fileName;
 	}
 
 	public String getChecksum() {
-		if (costumeFileName == null) {
+		if (fileName == null) {
 			return null;
 		}
-		return costumeFileName.substring(0, 32);
+		return fileName.substring(0, 32);
 	}
 
-	public String getFileExtension() {
-		if (costumeFileName == null) {
-			return null;
-		}
-		String[] splittedFileName = costumeFileName.split("\\.");
-		return splittedFileName[splittedFileName.length - 1];
-	}
-
-	public String getPathWithoutFileName() {
-		return Utils.buildPath(Consts.DEFAULT_ROOT, ProjectManager.getInstance().getCurrentProject().getName(),
-				Consts.IMAGE_DIRECTORY);
+	private String getPathToImageDirectory() {
+		return Utils.buildPath(Utils.buildProjectPath(ProjectManager.getInstance().getCurrentProject().getName()),
+				Constants.IMAGE_DIRECTORY);
 	}
 
 	public Bitmap getThumbnailBitmap() {
 		if (thumbnailBitmap == null) {
-			thumbnailBitmap = ImageEditing.getScaledBitmap(getAbsolutePath(), THUMBNAIL_HEIGHT, THUMBNAIL_WIDTH);
+			thumbnailBitmap = ImageEditing.getScaledBitmapFromPath(getAbsolutePath(), THUMBNAIL_HEIGHT,
+					THUMBNAIL_WIDTH, false);
 		}
 		return thumbnailBitmap;
 	}
@@ -97,28 +95,20 @@ public class CostumeData {
 	}
 
 	public int[] getResolution() {
-		if (resWidth != null && resHeight != null) {
-			return new int[] { resWidth, resHeight };
+		if (width != null && height != null) {
+			return new int[] { width, height };
 		}
 		BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inJustDecodeBounds = true;
 		BitmapFactory.decodeFile(getAbsolutePath(), options);
-		resWidth = options.outWidth;
-		resHeight = options.outHeight;
+		width = options.outWidth;
+		height = options.outHeight;
 
-		return new int[] { resWidth, resHeight };
-	}
-
-	public long getSizeInKb() {
-		if (sizeInKB != null) {
-			return sizeInKB;
-		}
-		sizeInKB = new File(getAbsolutePath()).length() / 1024;
-		return sizeInKB;
+		return new int[] { width, height };
 	}
 
 	@Override
 	public String toString() {
-		return costumeName;
+		return name;
 	}
 }

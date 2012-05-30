@@ -28,12 +28,14 @@ import android.app.Dialog;
 import android.app.TabActivity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
@@ -46,23 +48,35 @@ import at.tugraz.ist.catroid.stage.PreStageActivity;
 import at.tugraz.ist.catroid.stage.StageActivity;
 import at.tugraz.ist.catroid.ui.dialogs.AddBrickDialog;
 import at.tugraz.ist.catroid.ui.dialogs.BrickCategoryDialog;
+import at.tugraz.ist.catroid.ui.dialogs.DeleteCostumeDialog;
+import at.tugraz.ist.catroid.ui.dialogs.DeleteSoundDialog;
 import at.tugraz.ist.catroid.ui.dialogs.RenameCostumeDialog;
 import at.tugraz.ist.catroid.ui.dialogs.RenameSoundDialog;
 import at.tugraz.ist.catroid.utils.ActivityHelper;
+import at.tugraz.ist.catroid.utils.Utils;
 
-public class ScriptTabActivity extends TabActivity implements OnDismissListener {
+public class ScriptTabActivity extends TabActivity implements OnDismissListener, OnCancelListener {
 	protected ActivityHelper activityHelper;
 
 	private TabHost tabHost;
+	private boolean addScript;
+	private boolean isCanceled;
 	public SoundInfo selectedSoundInfo;
 	private RenameSoundDialog renameSoundDialog;
 	public CostumeData selectedCostumeData;
+	public int selectedPosition;
 	private RenameCostumeDialog renameCostumeDialog;
+	private DeleteCostumeDialog deleteCostumeDialog;
+	private DeleteSoundDialog deleteSoundDialog;
 	public String selectedCategory;
 	public static final int DIALOG_RENAME_COSTUME = 0;
 	public static final int DIALOG_RENAME_SOUND = 1;
 	public static final int DIALOG_BRICK_CATEGORY = 2;
 	public static final int DIALOG_ADD_BRICK = 3;
+	public static final int DIALOG_DELETE_COSTUME = 4;
+	public static final int DIALOG_DELETE_SOUND = 5;
+
+	private boolean dontcreateNewBrick;
 
 	private void setupTabHost() {
 		tabHost = (TabHost) findViewById(android.R.id.tabhost);
@@ -72,7 +86,12 @@ public class ScriptTabActivity extends TabActivity implements OnDismissListener 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		addScript = false;
+		isCanceled = false;
+		dontcreateNewBrick = false;
+
 		setContentView(R.layout.activity_scripttab);
+		Utils.loadProjectIfNeeded(this);
 
 		setupTabHost();
 		tabHost.getTabWidget().setDividerDrawable(R.drawable.tab_divider);
@@ -80,19 +99,22 @@ public class ScriptTabActivity extends TabActivity implements OnDismissListener 
 		Intent intent; // Reusable Intent for each tab
 
 		intent = new Intent().setClass(this, ScriptActivity.class);
-		setupTab(R.drawable.ic_tab_scripts, this.getString(R.string.scripts), intent);
+		setupTab(R.drawable.ic_tab_scripts_selector, this.getString(R.string.scripts), intent);
 		intent = new Intent().setClass(this, CostumeActivity.class);
 		int costumeIcon;
+		String costumeLabel;
 
 		Sprite currentSprite = ProjectManager.getInstance().getCurrentSprite();
 		if (ProjectManager.getInstance().getCurrentProject().getSpriteList().indexOf(currentSprite) == 0) {
-			costumeIcon = R.drawable.ic_tab_background;
+			costumeIcon = R.drawable.ic_tab_background_selector;
+			costumeLabel = this.getString(R.string.backgrounds);
 		} else {
-			costumeIcon = R.drawable.ic_tab_costumes;
+			costumeIcon = R.drawable.ic_tab_costumes_selector;
+			costumeLabel = this.getString(R.string.costumes);
 		}
-		setupTab(costumeIcon, this.getString(R.string.costumes), intent);
+		setupTab(costumeIcon, costumeLabel, intent);
 		intent = new Intent().setClass(this, SoundActivity.class);
-		setupTab(R.drawable.ic_tab_sounds, this.getString(R.string.sounds), intent);
+		setupTab(R.drawable.ic_tab_sounds_selector, this.getString(R.string.sounds), intent);
 
 		setUpActionBar();
 		if (getLastNonConfigurationInstance() != null) {
@@ -118,15 +140,16 @@ public class ScriptTabActivity extends TabActivity implements OnDismissListener 
 				+ ProjectManager.getInstance().getCurrentSprite().getName();
 		activityHelper.setupActionBar(false, title);
 
-		activityHelper.addActionButton(R.id.btn_action_add_sprite, R.drawable.ic_plus_black, null, false);
+		activityHelper.addActionButton(R.id.btn_action_add_button, R.drawable.ic_plus_black, R.string.add, null, false);
 
-		activityHelper.addActionButton(R.id.btn_action_play, R.drawable.ic_play_black, new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(ScriptTabActivity.this, PreStageActivity.class);
-				startActivityForResult(intent, PreStageActivity.REQUEST_RESOURCES_INIT);
-			}
-		}, false);
+
+		activityHelper.addActionButton(R.id.btn_action_play, R.drawable.ic_play_black, R.string.start,
+				new View.OnClickListener() {
+					public void onClick(View v) {
+						Intent intent = new Intent(ScriptTabActivity.this, PreStageActivity.class);
+						startActivityForResult(intent, PreStageActivity.REQUEST_RESOURCES_INIT);
+					}
+				}, false);
 	}
 
 	@Override
@@ -147,10 +170,13 @@ public class ScriptTabActivity extends TabActivity implements OnDismissListener 
 
 	private static View createTabView(Integer id, final Context context, final String text) {
 		View view = LayoutInflater.from(context).inflate(R.layout.activity_tabscriptactivity_tabs, null);
-		TextView tv = (TextView) view.findViewById(R.id.tabsText);
-		tv.setText(text);
+		TextView tabTextView = (TextView) view.findViewById(R.id.tabsText);
+		ImageView tabImageView = (ImageView) view.findViewById(R.id.tabsIcon);
+		tabTextView.setText(text);
 		if (id != null) {
-			tv.setCompoundDrawablesWithIntrinsicBounds(id, 0, 0, 0);
+			tabImageView.setImageResource(id);
+			tabImageView.setVisibility(ImageView.VISIBLE);
+			tabImageView.setTag(id);
 		}
 		return view;
 	}
@@ -174,10 +200,23 @@ public class ScriptTabActivity extends TabActivity implements OnDismissListener 
 			case DIALOG_BRICK_CATEGORY:
 				dialog = new BrickCategoryDialog(this);
 				dialog.setOnDismissListener(this);
+				dialog.setOnCancelListener(this);
 				break;
 			case DIALOG_ADD_BRICK:
 				if (selectedCategory != null) {
 					dialog = new AddBrickDialog(this, selectedCategory);
+				}
+				break;
+			case DIALOG_DELETE_COSTUME:
+				if (selectedCostumeData != null) {
+					deleteCostumeDialog = new DeleteCostumeDialog(this);
+					dialog = deleteCostumeDialog.createDialog();
+				}
+				break;
+			case DIALOG_DELETE_SOUND:
+				if (selectedSoundInfo != null) {
+					deleteSoundDialog = new DeleteSoundDialog(this);
+					dialog = deleteSoundDialog.createDialog();
 				}
 				break;
 			default:
@@ -217,9 +256,50 @@ public class ScriptTabActivity extends TabActivity implements OnDismissListener 
 		dismissDialog(DIALOG_RENAME_COSTUME);
 	}
 
-	@Override
-	public void onDismiss(DialogInterface dialogInterface) {
-		((ScriptActivity) getCurrentActivity()).updateAdapterAfterAddNewBrick(dialogInterface);
+
+	public void handlePositiveButtonDeleteCostume(View v) {
+		deleteCostumeDialog.handleOkButton();
 	}
 
+	public void handleNegativeButtonDeleteCostume(View v) {
+		dismissDialog(DIALOG_DELETE_COSTUME);
+	}
+
+	public void handlePositiveButtonDeleteSound(View v) {
+		deleteSoundDialog.handleOkButton();
+	}
+
+	public void handleNegativeButtonDeleteSound(View v) {
+		dismissDialog(DIALOG_DELETE_SOUND);
+	}
+
+	public void onDismiss(DialogInterface dialogInterface) {
+
+		if (!dontcreateNewBrick) {
+			if (!isCanceled) {
+				if (addScript) {
+
+					((ScriptActivity) getCurrentActivity()).setAddNewScript();
+					addScript = false;
+				}
+
+				((ScriptActivity) getCurrentActivity()).updateAdapterAfterAddNewBrick(dialogInterface);
+
+			}
+			isCanceled = false;
+		}
+		dontcreateNewBrick = false;
+	}
+
+	public void onCancel(DialogInterface dialog) {
+		isCanceled = true;
+	}
+
+	public void setNewScript() {
+		addScript = true;
+	}
+
+	public void setDontcreateNewBrick() {
+		dontcreateNewBrick = true;
+	}
 }

@@ -64,9 +64,6 @@ public class StorageHandlerTest extends InstrumentationTestCase {
 		String firstSpriteName = "Stage";
 		String secondSpriteName = "first";
 		String thirdSpriteName = "second";
-		String firstStartScriptName = "testScript";
-		String firstWhenScriptName = "script";
-		String secondStartScriptName = "otherScript";
 
 		NativeAppActivity.setContext(getInstrumentation().getContext());
 		Project loadedProject = storageHandler.loadProject("test_project.xml");
@@ -79,13 +76,6 @@ public class StorageHandlerTest extends InstrumentationTestCase {
 				.getName());
 		assertEquals("Name of third sprite does not match.", thirdSpriteName, loadedProject.getSpriteList().get(2)
 				.getName());
-
-		assertEquals("Name of script does not match.", firstStartScriptName, loadedProject.getSpriteList().get(1)
-				.getScript(0).getName());
-		assertEquals("Name of script does not match.", firstWhenScriptName, loadedProject.getSpriteList().get(1)
-				.getScript(1).getName());
-		assertEquals("Name of script does not match.", secondStartScriptName, loadedProject.getSpriteList().get(2)
-				.getScript(0).getName());
 
 		assertEquals("HideBrick was not loaded right", HideBrick.class,
 				loadedProject.getSpriteList().get(1).getScript(0).getBrickList().get(0).getClass());
@@ -159,4 +149,5 @@ public class StorageHandlerTest extends InstrumentationTestCase {
 						.get(6), false));
 
 	}
+
 }

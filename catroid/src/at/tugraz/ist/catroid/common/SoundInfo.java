@@ -27,11 +27,10 @@ import at.tugraz.ist.catroid.utils.Utils;
 
 public class SoundInfo implements Comparable<SoundInfo> {
 
-	private int id;
-	private String title;
+	private String name;
 	private String fileName;
-	public boolean isPlaying;
-	public boolean isPaused;
+	public transient boolean isPlaying = false;
+	public transient boolean isPaused = false;
 
 	public SoundInfo() {
 		isPlaying = false;
@@ -40,26 +39,18 @@ public class SoundInfo implements Comparable<SoundInfo> {
 
 	public String getAbsolutePath() {
 		if (fileName != null) {
-			return Utils.buildPath(getPathWithoutFileName(), fileName);
+			return Utils.buildPath(getPathToSoundDirectory(), fileName);
 		} else {
 			return null;
 		}
 	}
 
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
-
 	public String getTitle() {
-		return title;
+		return name;
 	}
 
 	public void setTitle(String title) {
-		this.title = title;
+		this.name = title;
 	}
 
 	public void setSoundFileName(String fileName) {
@@ -77,24 +68,17 @@ public class SoundInfo implements Comparable<SoundInfo> {
 		return fileName.substring(0, 32);
 	}
 
-	public String getFileExtension() {
-		if (fileName == null) {
-			return null;
-		}
-		return fileName.substring(fileName.length() - 4, fileName.length());
-	}
-
-	public String getPathWithoutFileName() {
-		return Utils.buildPath(Consts.DEFAULT_ROOT, ProjectManager.getInstance().getCurrentProject().getName(),
-				Consts.SOUND_DIRECTORY);
+	private String getPathToSoundDirectory() {
+		return Utils.buildPath(Utils.buildProjectPath(ProjectManager.getInstance().getCurrentProject().getName()),
+				Constants.SOUND_DIRECTORY);
 	}
 
 	public int compareTo(SoundInfo soundInfo) {
-		return title.compareTo(soundInfo.title);
+		return name.compareTo(soundInfo.name);
 	}
 
 	@Override
 	public String toString() {
-		return title;
+		return name;
 	}
 }

@@ -26,7 +26,7 @@ import java.io.File;
 import java.io.IOException;
 
 import android.test.AndroidTestCase;
-import at.tugraz.ist.catroid.common.Consts;
+import at.tugraz.ist.catroid.common.Constants;
 import at.tugraz.ist.catroid.utils.UtilFile;
 import at.tugraz.ist.catroid.utils.UtilZip;
 
@@ -48,15 +48,15 @@ public class ZipTest extends AndroidTestCase {
 
 	public void testZipUnzip() throws IOException {
 
-		String pathToTest = Consts.TMP_PATH + "/test1/";
+		String pathToTest = Constants.TMP_PATH + "/test1/";
 
 		File testfile = new File(pathToTest + "test2/testfile.txt");
 		testfile.getParentFile().mkdirs();
 		testfile.createNewFile();
 
-		String[] pathes = { pathToTest };
+		String[] paths = { pathToTest };
 
-		String zipFileName = Consts.TMP_PATH + "/testzip" + Consts.CATROID_EXTENTION;
+		String zipFileName = Constants.TMP_PATH + "/testzip" + Constants.CATROID_EXTENTION;
 		File zipFile = new File(zipFileName);
 		if (zipFile.exists()) {
 			zipFile.delete();
@@ -65,7 +65,7 @@ public class ZipTest extends AndroidTestCase {
 		zipFile.getParentFile().mkdirs();
 		zipFile.createNewFile();
 
-		if (!UtilZip.writeToZipFile(pathes, zipFileName)) {
+		if (!UtilZip.writeToZipFile(paths, zipFileName)) {
 			zipFile.delete();
 			assertFalse("zip failed", true);
 			return;
@@ -73,7 +73,7 @@ public class ZipTest extends AndroidTestCase {
 		testfile.delete();
 		testfile.getParentFile().delete();
 
-		if (!UtilZip.unZipFile(zipFileName, Consts.TMP_PATH + "/")) {
+		if (!UtilZip.unZipFile(zipFileName, Constants.TMP_PATH + "/")) {
 			zipFile.delete();
 			assertFalse("unzip failed", true);
 			return;
@@ -85,7 +85,7 @@ public class ZipTest extends AndroidTestCase {
 
 		zipFile.delete();
 
-		File tempDirectory = new File(Consts.TMP_PATH);
+		File tempDirectory = new File(Constants.TMP_PATH);
 		if (tempDirectory.exists()) {
 			UtilFile.deleteDirectory(tempDirectory);
 		}

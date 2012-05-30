@@ -29,7 +29,7 @@ import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.test.InstrumentationTestCase;
 import at.tugraz.ist.catroid.ProjectManager;
-import at.tugraz.ist.catroid.common.Consts;
+import at.tugraz.ist.catroid.common.Constants;
 import at.tugraz.ist.catroid.common.CostumeData;
 import at.tugraz.ist.catroid.content.Project;
 import at.tugraz.ist.catroid.content.Script;
@@ -47,11 +47,12 @@ import at.tugraz.ist.catroid.utils.Utils;
 
 public class ProjectManagerTest extends InstrumentationTestCase {
 
-	String projectNameOne = "Ulumulu";
-	String scriptNameOne = "Ulukai";
-	String scriptNameTwo = "Ulukai2";
-	String spriteNameOne = "Zuul";
-	String spriteNameTwo = "Zuuul";
+	private String projectNameOne = "Ulumulu";
+	private String spriteNameOne = "Zuul";
+	private String spriteNameTwo = "Zuuul";
+
+	private Script testScript;
+	private Script otherScript;
 
 	@Override
 	public void tearDown() {
@@ -89,13 +90,11 @@ public class ProjectManagerTest extends InstrumentationTestCase {
 				.getName());
 
 		// add script
-		Script startScript = new StartScript(scriptNameOne, sprite);
+		Script startScript = new StartScript(sprite);
 		projectManager.addScript(startScript);
 		projectManager.setCurrentScript(startScript);
 
 		assertNotNull("no current script set", projectManager.getCurrentScript());
-		assertEquals("The Spritename is not " + scriptNameOne, scriptNameOne, projectManager.getCurrentScript()
-				.getName());
 
 		// loadProject
 		projectManager.loadProject(projectNameOne, context, false);
@@ -113,7 +112,7 @@ public class ProjectManagerTest extends InstrumentationTestCase {
 
 		// addScript
 		projectManager.setCurrentSprite(sprite2);
-		Script script2 = new StartScript(scriptNameTwo, sprite2);
+		Script script2 = new StartScript(sprite2);
 		projectManager.addScript(script2);
 		assertTrue("Script not in current Sprite", projectManager.getCurrentSprite().getScriptIndex(script2) != -1);
 
@@ -136,13 +135,11 @@ public class ProjectManagerTest extends InstrumentationTestCase {
 		}
 		projectManager.saveProject();
 
-		File oldProjectFolder = new File(Consts.DEFAULT_ROOT + "/" + oldProjectName);
-		File oldProjectFile = new File(Consts.DEFAULT_ROOT + "/" + oldProjectName + "/" + oldProjectName
-				+ Consts.PROJECT_EXTENTION);
+		File oldProjectFolder = new File(Constants.DEFAULT_ROOT + "/" + oldProjectName);
+		File oldProjectFile = new File(Constants.DEFAULT_ROOT + "/" + oldProjectName + "/" + Constants.PROJECTCODE_NAME);
 
-		File newProjectFolder = new File(Consts.DEFAULT_ROOT + "/" + newProjectName);
-		File newProjectFile = new File(Consts.DEFAULT_ROOT + "/" + newProjectName + "/" + newProjectName
-				+ Consts.PROJECT_EXTENTION);
+		File newProjectFolder = new File(Constants.DEFAULT_ROOT + "/" + newProjectName);
+		File newProjectFile = new File(Constants.DEFAULT_ROOT + "/" + newProjectName + "/" + Constants.PROJECTCODE_NAME);
 
 		String projectFileAsString = TestUtils.getProjectfileAsString(newProjectName);
 
@@ -170,8 +167,8 @@ public class ProjectManagerTest extends InstrumentationTestCase {
 		Sprite secondSprite = new Sprite("dog");
 		Sprite thirdSprite = new Sprite("horse");
 		Sprite fourthSprite = new Sprite("pig");
-		Script testScript = new StartScript("testScript", firstSprite);
-		Script otherScript = new StartScript("otherScript", secondSprite);
+		testScript = new StartScript(firstSprite);
+		otherScript = new StartScript(secondSprite);
 		HideBrick hideBrick = new HideBrick(firstSprite);
 		ShowBrick showBrick = new ShowBrick(firstSprite);
 		SetCostumeBrick costumeBrick = new SetCostumeBrick(firstSprite);

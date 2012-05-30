@@ -23,16 +23,14 @@
 package at.tugraz.ist.catroid.test.utiltests;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
 import junit.framework.TestCase;
 import android.util.Log;
-import at.tugraz.ist.catroid.common.Consts;
+import at.tugraz.ist.catroid.common.Constants;
 import at.tugraz.ist.catroid.test.utils.TestUtils;
 import at.tugraz.ist.catroid.utils.UtilFile;
 import at.tugraz.ist.catroid.utils.Utils;
@@ -73,46 +71,14 @@ public class UtilsTest extends TestCase {
 		}
 	}
 
-	public void testCopyFile() throws InterruptedException {
-		String newpath = mTestFile.getParent() + "/copiedFile.txt";
-		Utils.copyFile(mTestFile.getAbsolutePath(), newpath, null, false);
-		Thread.sleep(1000); // Wait for thread to write file
-		copiedFile = new File(newpath);
-
-		assertTrue("File was not copied correctly", copiedFile.exists());
-
-		FileReader fReader;
-		String newContent = "";
-
-		try {
-			fReader = new FileReader(copiedFile);
-
-			int read;
-			while ((read = fReader.read()) != -1) {
-				newContent = newContent + (char) read;
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		assertEquals("Unexpected content of test file", testFileContent, newContent);
-	}
-
-	public void testDeleteFile() {
-		Utils.deleteFile(mTestFile.getAbsolutePath());
-		assertFalse("File still exists after delete", mTestFile.exists());
-	}
-
 	public void testMD5CheckSumOfFile() {
 
 		PrintWriter printWriter = null;
 
-		File tempDir = new File(Consts.TMP_PATH);
+		File tempDir = new File(Constants.TMP_PATH);
 		tempDir.mkdirs();
 
-		File md5TestFile = new File(Utils.buildPath(Consts.TMP_PATH, "catroid.txt"));
+		File md5TestFile = new File(Utils.buildPath(Constants.TMP_PATH, "catroid.txt"));
 
 		if (md5TestFile.exists()) {
 			md5TestFile.delete();
@@ -171,7 +137,7 @@ public class UtilsTest extends TestCase {
 		Log.v(TAG, secretFloat.toString());
 		assertEquals("Getting private float failed!", new Float(3.1415f), secretFloat);
 	}
-	
+
 	public void testBuildPath() {
 		String first = "/abc/abc";
 		String second = "/def/def/";
@@ -193,7 +159,6 @@ public class UtilsTest extends TestCase {
 		result = "/abc/abc/def/def";
 		assertEquals(Utils.buildPath(first, second), result);
 	}
-	
 
 	public void testUniqueName() {
 		String first = Utils.getUniqueName();
@@ -202,5 +167,42 @@ public class UtilsTest extends TestCase {
 		assertFalse("Same unique name!", first.equals(second));
 		assertFalse("Same unique name!", first.equals(third));
 		assertFalse("Same unique name!", second.equals(third));
+	}
+
+	public void testInvokeMethod() {
+		class Test {
+			@SuppressWarnings("unused")
+			private String testMethod1() {
+				return "Called testMethod1!";
+			};
+
+			@SuppressWarnings("unused")
+			private String testMethod2(String param1, String param2) {
+				return param1 + " " + param2;
+			};
+		}
+
+		String testString1 = (String) TestUtils.invokeMethod(new Test(), "testMethod1", null, null);
+		assertEquals("Calling private method without arguments failed!", "Called testMethod1!", testString1);
+
+		String test1 = "Calling method";
+		String test2 = "with parameters!";
+		Class<?> methodParams[] = new Class[] { String.class, String.class };
+		Object methodArgs[] = new Object[] { test1, test2 };
+
+		String testString2 = (String) TestUtils.invokeMethod(new Test(), "testMethod2", methodParams, methodArgs);
+		assertEquals("Calling private method with arguments failed!", test1 + " " + test2, testString2);
+	}
+
+	public void testDeleteSpecialCharactersFromString() {
+		String testString = "This:IsA-\" */ :<Very>?|Very\\\\Long_Test_String";
+		String newString = Utils.deleteSpecialCharactersInString(testString);
+		assertEquals("Strings are not equal!", "ThisIsA-  VeryVeryLong_Test_String", newString);
+	}
+
+	public void testBuildProjectPath() {
+		String projectName1 = "test?Projekt\"1";
+		String result1 = "/mnt/sdcard/catroid/testProjekt1";
+		assertEquals("Paths are different!", result1, Utils.buildProjectPath(projectName1));
 	}
 }

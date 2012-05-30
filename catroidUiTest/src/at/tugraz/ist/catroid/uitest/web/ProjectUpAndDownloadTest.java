@@ -34,8 +34,7 @@ import android.preference.PreferenceManager;
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.UiThreadTest;
 import at.tugraz.ist.catroid.R;
-import at.tugraz.ist.catroid.common.Consts;
-import at.tugraz.ist.catroid.ui.DownloadActivity;
+import at.tugraz.ist.catroid.common.Constants;
 import at.tugraz.ist.catroid.ui.MainMenuActivity;
 import at.tugraz.ist.catroid.uitest.util.UiTestUtils;
 import at.tugraz.ist.catroid.utils.UtilFile;
@@ -61,13 +60,13 @@ public class ProjectUpAndDownloadTest extends ActivityInstrumentationTestCase2<M
 	public void setUp() throws Exception {
 		solo = new Solo(getInstrumentation(), getActivity());
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		saveToken = prefs.getString(Consts.TOKEN, "0");
+		saveToken = prefs.getString(Constants.TOKEN, "0");
 	}
 
 	@Override
 	public void tearDown() throws Exception {
 		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-		prefs.edit().putString(Consts.TOKEN, saveToken).commit();
+		prefs.edit().putString(Constants.TOKEN, saveToken).commit();
 		try {
 			solo.finalize();
 		} catch (Throwable e) {
@@ -78,7 +77,7 @@ public class ProjectUpAndDownloadTest extends ActivityInstrumentationTestCase2<M
 		super.tearDown();
 	}
 
-	private void startProjectUploadTask() throws Throwable {
+	private void setServerURLToTestUrl() throws Throwable {
 		runTestOnUiThread(new Runnable() {
 			public void run() {
 				ServerCalls.useTestUrl = true;
@@ -87,10 +86,15 @@ public class ProjectUpAndDownloadTest extends ActivityInstrumentationTestCase2<M
 	}
 
 	public void testUploadProjectSuccess() throws Throwable {
-		startProjectUploadTask();
+		setServerURLToTestUrl();
 
 		createTestProject(testProject);
 		addABrickToProject();
+
+		//intent to the main activity is sent since changing activity orientation is not working
+		//after executing line "UiTestUtils.clickOnLinearLayout(solo, R.id.btn_action_home);" 
+		Intent intent = new Intent(getActivity(), MainMenuActivity.class);
+		getActivity().startActivity(intent);
 
 		UiTestUtils.createValidUser(getActivity());
 
@@ -102,7 +106,7 @@ public class ProjectUpAndDownloadTest extends ActivityInstrumentationTestCase2<M
 	}
 
 	private void createTestProject(String projectToCreate) {
-		File directory = new File(Consts.DEFAULT_ROOT + "/" + projectToCreate);
+		File directory = new File(Constants.DEFAULT_ROOT + "/" + projectToCreate);
 		if (directory.exists()) {
 			UtilFile.deleteDirectory(directory);
 		}
@@ -111,18 +115,17 @@ public class ProjectUpAndDownloadTest extends ActivityInstrumentationTestCase2<M
 		solo.clickOnButton(getActivity().getString(R.string.new_project));
 		solo.enterText(0, projectToCreate);
 		solo.goBack();
-		solo.clickOnButton(getActivity().getString(R.string.new_project_dialog_button));
+		solo.clickOnButton(0);
 		solo.sleep(2000);
 
-		File file = new File(Consts.DEFAULT_ROOT + "/" + projectToCreate + "/" + projectToCreate
-				+ Consts.PROJECT_EXTENTION);
+		File file = new File(Constants.DEFAULT_ROOT + "/" + projectToCreate + "/" + Constants.PROJECTCODE_NAME);
 		assertTrue(projectToCreate + " was not created!", file.exists());
 	}
 
 	private void addABrickToProject() {
 		solo.clickInList(0);
-		UiTestUtils.addNewBrickAndScrollDown(solo, R.string.brick_wait);
-		UiTestUtils.clickOnImageButton(solo, R.id.btn_action_home);
+		UiTestUtils.addNewBrick(solo, R.string.brick_wait);
+		UiTestUtils.clickOnLinearLayout(solo, R.id.btn_action_home);
 	}
 
 	private void uploadProject() {
@@ -139,9 +142,15 @@ public class ProjectUpAndDownloadTest extends ActivityInstrumentationTestCase2<M
 		solo.clickOnEditText(1);
 		solo.enterText(1, "the project description");
 
+		//		solo.setActivityOrientation(Solo.LANDSCAPE);
+
 		solo.clickOnButton(getActivity().getString(R.string.upload_button));
 
+		solo.sleep(500);
+
 		try {
+			solo.setActivityOrientation(Solo.LANDSCAPE);
+
 			solo.waitForDialogToClose(10000);
 			assertTrue("Upload failed. Internet connection?",
 					solo.searchText(getActivity().getString(R.string.success_project_upload)));
@@ -152,26 +161,28 @@ public class ProjectUpAndDownloadTest extends ActivityInstrumentationTestCase2<M
 
 			solo.clickOnButton(0);
 		} catch (JSONException e) {
-			assertFalse("json exception orrured", true);
+			fail("JSON exception orrured");
 		}
 	}
 
 	private void downloadProject() {
-		String downloadUrl = TEST_FILE_DOWNLOAD_URL + serverProjectId + Consts.CATROID_EXTENTION;
+		String downloadUrl = TEST_FILE_DOWNLOAD_URL + serverProjectId + Constants.CATROID_EXTENTION;
 		downloadUrl += "?fname=" + newTestProject;
-		Intent intent = new Intent(getActivity(), DownloadActivity.class);
+
+		Intent intent = new Intent(getActivity(), MainMenuActivity.class);
 		intent.setAction(Intent.ACTION_VIEW);
 		intent.setData(Uri.parse(downloadUrl));
-		launchActivityWithIntent("at.tugraz.ist.catroid", DownloadActivity.class, intent);
+		launchActivityWithIntent("at.tugraz.ist.catroid", MainMenuActivity.class, intent);
 
 		boolean waitResult = solo.waitForActivity("MainMenuActivity", 10000);
 		assertTrue("Download takes too long.", waitResult);
+		assertTrue("Testproject2 not loaded.", solo.searchText(newTestProject));
 		assertNotNull("Download not successful.",
 				solo.searchText(getActivity().getString(R.string.success_project_download)));
 
-		String projectPath = Consts.DEFAULT_ROOT + "/" + newTestProject;
+		String projectPath = Constants.DEFAULT_ROOT + "/" + newTestProject;
 		File downloadedDirectory = new File(projectPath);
-		File downloadedProjectFile = new File(projectPath + "/" + newTestProject + Consts.PROJECT_EXTENTION);
+		File downloadedProjectFile = new File(projectPath + "/" + Constants.PROJECTCODE_NAME);
 		assertTrue("Downloaded Directory does not exist.", downloadedDirectory.exists());
 		assertTrue("Project File does not exist.", downloadedProjectFile.exists());
 

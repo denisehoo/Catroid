@@ -29,8 +29,9 @@ import java.util.ArrayList;
 import android.test.AndroidTestCase;
 import at.tugraz.ist.catroid.ProjectManager;
 import at.tugraz.ist.catroid.R;
-import at.tugraz.ist.catroid.common.Consts;
+import at.tugraz.ist.catroid.common.Constants;
 import at.tugraz.ist.catroid.common.CostumeData;
+import at.tugraz.ist.catroid.common.StandardProjectHandler;
 import at.tugraz.ist.catroid.content.Project;
 import at.tugraz.ist.catroid.content.Script;
 import at.tugraz.ist.catroid.content.Sprite;
@@ -70,7 +71,7 @@ public class StorageHandlerTest extends AndroidTestCase {
 
 	@Override
 	public void setUp() {
-		File projectFile = new File(Consts.DEFAULT_ROOT + "/" + getContext().getString(R.string.default_project_name));
+		File projectFile = new File(Constants.DEFAULT_ROOT + "/" + getContext().getString(R.string.default_project_name));
 
 		if (projectFile.exists()) {
 			UtilFile.deleteDirectory(projectFile);
@@ -88,8 +89,8 @@ public class StorageHandlerTest extends AndroidTestCase {
 		Sprite secondSprite = new Sprite("second");
 		Sprite thirdSprite = new Sprite("third");
 		Sprite fourthSprite = new Sprite("fourth");
-		Script testScript = new StartScript("testScript", firstSprite);
-		Script otherScript = new StartScript("otherScript", secondSprite);
+		Script testScript = new StartScript(firstSprite);
+		Script otherScript = new StartScript(secondSprite);
 		HideBrick hideBrick = new HideBrick(firstSprite);
 		ShowBrick showBrick = new ShowBrick(firstSprite);
 		SetSizeToBrick setSizeToBrick = new SetSizeToBrick(secondSprite, size);
@@ -152,18 +153,18 @@ public class StorageHandlerTest extends AndroidTestCase {
 		assertFalse("paused should not be set in script", preSpriteList.get(1).getScript(0).isPaused());
 
 		// Test version codes and names
-		final int preVersionCode = (Integer) TestUtils.getPrivateField("versionCode", project, false);
-		final int postVersionCode = (Integer) TestUtils.getPrivateField("versionCode", loadedProject, false);
+		final int preVersionCode = (Integer) TestUtils.getPrivateField("catroidVersionCode", project, false);
+		final int postVersionCode = (Integer) TestUtils.getPrivateField("catroidVersionCode", loadedProject, false);
 		assertEquals("Version codes are not equal", preVersionCode, postVersionCode);
 
-		final String preVersionName = (String) TestUtils.getPrivateField("versionName", project, false);
-		final String postVersionName = (String) TestUtils.getPrivateField("versionName", loadedProject, false);
+		final String preVersionName = (String) TestUtils.getPrivateField("catroidVersionName", project, false);
+		final String postVersionName = (String) TestUtils.getPrivateField("catroidVersionName", loadedProject, false);
 		assertEquals("Version names are not equal", preVersionName, postVersionName);
 	}
 
 	public void testDefaultProject() throws IOException {
 		ProjectManager projectManager = ProjectManager.getInstance();
-		projectManager.setProject(storageHandler.createDefaultProject(getContext()));
+		projectManager.setProject(StandardProjectHandler.createAndSaveStandardProject(getContext()));
 		assertEquals("not the right number of sprites in the default project", 2, projectManager.getCurrentProject()
 				.getSpriteList().size());
 		assertEquals("not the right number of scripts in the second sprite of default project", 2, projectManager
@@ -203,15 +204,15 @@ public class StorageHandlerTest extends AndroidTestCase {
 
 		String projectName = "myProject";
 
-		File projectFile = new File(Consts.DEFAULT_ROOT + "/" + projectName);
+		File projectFile = new File(Constants.DEFAULT_ROOT + "/" + projectName);
 		if (projectFile.exists()) {
 			UtilFile.deleteDirectory(projectFile);
 		}
 
 		Project project = new Project(getContext(), projectName);
 		Sprite sprite = new Sprite("testSprite");
-		Script startScript = new StartScript("testScript", sprite);
-		Script whenScript = new WhenScript("whenScript", sprite);
+		Script startScript = new StartScript(sprite);
+		Script whenScript = new WhenScript(sprite);
 		sprite.addScript(startScript);
 		sprite.addScript(whenScript);
 		project.addSprite(sprite);
@@ -247,9 +248,10 @@ public class StorageHandlerTest extends AndroidTestCase {
 		String xmlHeader = (String) TestUtils.getPrivateField("XML_HEADER", storageHandler, false);
 		assertTrue("Project file did not contain correct XML header.", projectString.startsWith(xmlHeader));
 
-		projectFile = new File(Consts.DEFAULT_ROOT + "/" + projectName);
+		projectFile = new File(Constants.DEFAULT_ROOT + "/" + projectName);
 		if (projectFile.exists()) {
 			UtilFile.deleteDirectory(projectFile);
 		}
 	}
+
 }

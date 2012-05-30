@@ -63,12 +63,17 @@ public class BrickCategoryDialog extends Dialog {
 		closeButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				abort();
 				dismiss();
 			}
 		});
 
 		TextView textView = (TextView) findViewById(R.id.tv_dialog_title);
 		textView.setText(activity.getString(R.string.categories));
+	}
+
+	private void abort() {
+		activity.setDontcreateNewBrick();
 	}
 
 	private void setupBrickCategories(ListView listView) {

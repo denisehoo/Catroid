@@ -33,12 +33,12 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Color;
 import at.tugraz.ist.catroid.ProjectManager;
-import at.tugraz.ist.catroid.common.Consts;
 import at.tugraz.ist.catroid.common.Values;
 import at.tugraz.ist.catroid.content.Project;
 import at.tugraz.ist.catroid.content.Sprite;
 import at.tugraz.ist.catroid.io.SoundManager;
 import at.tugraz.ist.catroid.ui.dialogs.StageDialog;
+import at.tugraz.ist.catroid.utils.Utils;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
@@ -57,6 +57,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 public class StageListener implements ApplicationListener {
 	private static final boolean DEBUG = false;
+	public static final String SCREENSHOT_FILE_NAME = "screenshot.png";
 	private FPSLogger fpsLogger;
 
 	private Stage stage;
@@ -88,7 +89,11 @@ public class StageListener implements ApplicationListener {
 	private float virtualWidth;
 	private float virtualHeight;
 
-	public int screenMode = Consts.STRETCH;
+	enum ScreenModes {
+		STRETCH, MAXIMIZE
+	};
+
+	public ScreenModes screenMode;
 	public int maximizeViewPortX = 0;
 	public int maximizeViewPortY = 0;
 	public int maximizeViewPortHeight = 0;
@@ -117,18 +122,19 @@ public class StageListener implements ApplicationListener {
 		font.setColor(1f, 0f, 0.05f, 1f);
 		font.setScale(1.2f);
 
-		pathForScreenshot = Consts.DEFAULT_ROOT + "/" + ProjectManager.getInstance().getCurrentProject().getName()
-				+ "/";
+		pathForScreenshot = Utils.buildProjectPath(ProjectManager.getInstance().getCurrentProject().getName()) + "/";
 
 		costumeComparator = new CostumeComparator();
 
 		project = ProjectManager.getInstance().getCurrentProject();
 
-		virtualWidth = project.VIRTUAL_SCREEN_WIDTH;
-		virtualHeight = project.VIRTUAL_SCREEN_HEIGHT;
+		virtualWidth = project.virtualScreenWidth;
+		virtualHeight = project.virtualScreenHeight;
 
 		virtualWidthHalf = virtualWidth / 2;
 		virtualHeightHalf = virtualHeight / 2;
+
+		screenMode = ScreenModes.STRETCH;
 
 		stage = new Stage(virtualWidth, virtualHeight, true);
 		batch = stage.getSpriteBatch();
@@ -256,14 +262,14 @@ public class StageListener implements ApplicationListener {
 		stage.getRoot().sortChildren(costumeComparator);
 
 		switch (screenMode) {
-			case Consts.MAXIMIZE:
+			case MAXIMIZE:
 				Gdx.gl.glViewport(maximizeViewPortX, maximizeViewPortY, maximizeViewPortWidth, maximizeViewPortHeight);
 				screenshotWidth = maximizeViewPortWidth;
 				screenshotHeight = maximizeViewPortHeight;
 				screenshotX = maximizeViewPortX;
 				screenshotY = maximizeViewPortY;
 				break;
-			case Consts.STRETCH:
+			case STRETCH:
 			default:
 				Gdx.gl.glViewport(0, 0, Values.SCREEN_WIDTH, Values.SCREEN_HEIGHT);
 				screenshotWidth = Values.SCREEN_WIDTH;
@@ -290,7 +296,7 @@ public class StageListener implements ApplicationListener {
 		}
 
 		if (makeFirstScreenshot && !NativeAppActivity.isRunning()) {
-			File file = new File(pathForScreenshot + Consts.SCREENSHOT_FILE_NAME);
+			File file = new File(pathForScreenshot + SCREENSHOT_FILE_NAME);
 			if (!file.exists()) {
 				File noMediaFile = new File(pathForScreenshot + ".nomedia");
 				try {
@@ -396,7 +402,7 @@ public class StageListener implements ApplicationListener {
 		Bitmap bitmap = Bitmap.createBitmap(colors, 0, screenshotWidth, screenshotWidth, screenshotHeight,
 				Config.ARGB_8888);
 
-		FileHandle image = Gdx.files.absolute(pathForScreenshot + Consts.SCREENSHOT_FILE_NAME);
+		FileHandle image = Gdx.files.absolute(pathForScreenshot + SCREENSHOT_FILE_NAME);
 		OutputStream stream = image.write(false);
 		try {
 			bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
@@ -417,6 +423,17 @@ public class StageListener implements ApplicationListener {
 			Thread.yield();
 		}
 		return testPixels;
+	}
+
+	public void changeScreenSize() {
+		switch (screenMode) {
+			case MAXIMIZE:
+				screenMode = ScreenModes.STRETCH;
+				break;
+			case STRETCH:
+				screenMode = ScreenModes.MAXIMIZE;
+				break;
+		}
 	}
 
 }

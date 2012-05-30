@@ -31,9 +31,11 @@ import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import at.tugraz.ist.catroid.ProjectManager;
@@ -46,6 +48,8 @@ import at.tugraz.ist.catroid.utils.ActivityHelper;
 import at.tugraz.ist.catroid.utils.Utils;
 
 public class SoundActivity extends ListActivity {
+	private static final String TAG = SoundActivity.class.getSimpleName();
+
 	public MediaPlayer mediaPlayer;
 	private ArrayList<SoundInfo> soundInfoList;
 
@@ -87,9 +91,9 @@ public class SoundActivity extends ListActivity {
 		ActivityHelper activityHelper = scriptTabActivity.activityHelper;
 		if (activityHelper != null) {
 			//set new functionality for actionbar add button:
-			activityHelper.changeClickListener(R.id.btn_action_add_sprite, createAddSoundClickListener());
+			activityHelper.changeClickListener(R.id.btn_action_add_button, createAddSoundClickListener());
 			//set new icon for actionbar plus button:
-			activityHelper.changeButtonIcon(R.id.btn_action_add_sprite, R.drawable.ic_music);
+			activityHelper.changeButtonIcon(R.id.btn_action_add_button, R.drawable.ic_music);
 		}
 
 	}
@@ -100,7 +104,8 @@ public class SoundActivity extends ListActivity {
 			public void onClick(View v) {
 				Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
 				intent.setType("audio/*");
-				startActivityForResult(Intent.createChooser(intent, "Select music"), REQUEST_SELECT_MUSIC);
+				startActivityForResult(Intent.createChooser(intent, getString(R.string.sound_select_source)),
+						REQUEST_SELECT_MUSIC);
 			}
 		};
 	}
@@ -117,6 +122,9 @@ public class SoundActivity extends ListActivity {
 	}
 
 	private void updateSoundAdapter(String title, String fileName) {
+
+		title = Utils.getUniqueSoundName(title);
+
 		SoundInfo newSoundInfo = new SoundInfo();
 		newSoundInfo.setTitle(title);
 		newSoundInfo.setSoundFileName(fileName);
@@ -186,9 +194,15 @@ public class SoundActivity extends ListActivity {
 					Uri audioUri = data.getData();
 					String[] proj = { MediaStore.Audio.Media.DATA };
 					Cursor actualSoundCursor = managedQuery(audioUri, proj, null, null, null);
-					int actualSoundColumnIndex = actualSoundCursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
-					actualSoundCursor.moveToFirst();
-					audioPath = actualSoundCursor.getString(actualSoundColumnIndex);
+
+					if (actualSoundCursor != null) {
+						int actualSoundColumnIndex = actualSoundCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+						actualSoundCursor.moveToFirst();
+						audioPath = actualSoundCursor.getString(actualSoundColumnIndex);
+					} else {
+						audioPath = audioUri.getPath();
+					}
+					Log.i(TAG, "audiopath: " + audioPath);
 				}
 				//-----------------------------------------------------
 
@@ -201,6 +215,7 @@ public class SoundActivity extends ListActivity {
 						soundFileName.lastIndexOf('.'));
 				updateSoundAdapter(soundTitle, soundFileName);
 			} catch (Exception e) {
+				e.printStackTrace();
 				Utils.displayErrorMessage(this, this.getString(R.string.error_load_sound));
 			}
 		}
@@ -211,4 +226,47 @@ public class SoundActivity extends ListActivity {
 		setListAdapter(new SoundAdapter(this, R.layout.activity_sound_soundlist_item, soundInfoList));
 		((SoundAdapter) getListAdapter()).notifyDataSetChanged();
 	}
+
+	// Does not rename the actual file, only the title in the SoundInfo
+	public void handleSoundRenameButton(View v) {
+		int position = (Integer) v.getTag();
+		ScriptTabActivity scriptTabActivity = (ScriptTabActivity) getParent();
+		scriptTabActivity.selectedSoundInfo = soundInfoList.get(position);
+		scriptTabActivity.showDialog(ScriptTabActivity.DIALOG_RENAME_SOUND);
+	}
+
+	public void handlePlaySoundButton(View v) {
+		final int position = (Integer) v.getTag();
+		final SoundInfo soundInfo = soundInfoList.get(position);
+
+		stopSound(soundInfo);
+		startSound(soundInfo);
+
+		mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+			public void onCompletion(MediaPlayer mp) {
+				soundInfo.isPlaying = false;
+				soundInfo.isPaused = false;
+				((SoundAdapter) getListAdapter()).notifyDataSetChanged();
+			}
+		});
+
+		((SoundAdapter) getListAdapter()).notifyDataSetChanged();
+	}
+
+	public void handlePauseSoundButton(View v) {
+		final int position = (Integer) v.getTag();
+		pauseSound(soundInfoList.get(position));
+		((SoundAdapter) getListAdapter()).notifyDataSetChanged();
+	}
+
+	public void handleDeleteSoundButton(View v) {
+		final int position = (Integer) v.getTag();
+		stopSound(null);
+		ScriptTabActivity scriptTabActivity = (ScriptTabActivity) getParent();
+		scriptTabActivity.selectedSoundInfo = soundInfoList.get(position);
+		scriptTabActivity.selectedPosition = position;
+		scriptTabActivity.showDialog(ScriptTabActivity.DIALOG_DELETE_SOUND);
+
+	}
+
 }
