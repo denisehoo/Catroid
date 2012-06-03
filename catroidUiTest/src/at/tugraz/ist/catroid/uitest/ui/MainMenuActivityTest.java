@@ -91,15 +91,11 @@ public class MainMenuActivityTest extends ActivityInstrumentationTestCase2<MainM
 		assertEquals("Not the proper hint set", hintNewProjectText, addNewProjectEditText.getHint());
 		assertEquals("There should no text be set", "", addNewProjectEditText.getText().toString());
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(100);
 		solo.clearEditText(0);
 		solo.enterText(0, testProject);
 		solo.setActivityOrientation(Solo.LANDSCAPE);
-		solo.sleep(200);
 		assertTrue("EditText field got cleared after changing orientation", solo.searchText(testProject));
-		solo.sleep(100);
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(100);
 		String buttonOKText = solo.getString(R.string.ok);
 		solo.waitForText(buttonOKText);
 		solo.clickOnText(buttonOKText);
@@ -112,15 +108,11 @@ public class MainMenuActivityTest extends ActivityInstrumentationTestCase2<MainM
 	public void testCreateNewProjectErrors() {
 		solo.clickOnButton(getActivity().getString(R.string.new_project));
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(100);
 		solo.clearEditText(0);
 		solo.enterText(0, "");
 		solo.setActivityOrientation(Solo.LANDSCAPE);
-		solo.sleep(200);
 		assertTrue("EditText field got cleared after changing orientation", solo.searchText(""));
-		solo.sleep(100);
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(100);
 		solo.goBack();
 		solo.sendKey(Solo.ENTER);
 
@@ -133,15 +125,11 @@ public class MainMenuActivityTest extends ActivityInstrumentationTestCase2<MainM
 		solo.sleep(50);
 
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(100);
 		solo.clearEditText(0);
 		solo.enterText(0, testProject);
 		solo.setActivityOrientation(Solo.LANDSCAPE);
-		solo.sleep(200);
 		assertTrue("EditText field got cleared after changing orientation", solo.searchText(testProject));
-		solo.sleep(100);
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(100);
 		solo.clickOnButton(0);
 
 		assertTrue("No error message was displayed upon creating a project with the same name twice.",
@@ -153,15 +141,11 @@ public class MainMenuActivityTest extends ActivityInstrumentationTestCase2<MainM
 		directory.mkdirs();
 		solo.sleep(50);
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(100);
 		solo.clearEditText(0);
 		solo.enterText(0, name);
 		solo.setActivityOrientation(Solo.LANDSCAPE);
-		solo.sleep(200);
 		assertTrue("EditText field got cleared after changing orientation", solo.searchText(name));
-		solo.sleep(100);
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(100);
 		solo.clickOnButton(0);
 
 		assertTrue("No error message was displayed upon creating a project with the same name twice.",
@@ -177,13 +161,10 @@ public class MainMenuActivityTest extends ActivityInstrumentationTestCase2<MainM
 
 		solo.clickOnButton(getActivity().getString(R.string.new_project));
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(100);
 		solo.clearEditText(0);
 		solo.enterText(0, projectNameWithBlacklistedCharacters);
 		solo.setActivityOrientation(Solo.LANDSCAPE);
-		solo.sleep(200);
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(100);
 		String buttonOKText = solo.getString(R.string.ok);
 		solo.waitForText(buttonOKText);
 		solo.clickOnText(buttonOKText);
@@ -200,13 +181,10 @@ public class MainMenuActivityTest extends ActivityInstrumentationTestCase2<MainM
 
 		solo.clickOnButton(getActivity().getString(R.string.new_project));
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(100);
 		solo.clearEditText(0);
 		solo.enterText(0, projectNameWithWhitelistedCharacters);
 		solo.setActivityOrientation(Solo.LANDSCAPE);
-		solo.sleep(200);
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(100);
 		String buttonOKText = solo.getString(R.string.ok);
 		solo.waitForText(buttonOKText);
 		solo.clickOnText(buttonOKText);
