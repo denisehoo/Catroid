@@ -67,7 +67,6 @@ public class RenameSpriteDialogTest extends ActivityInstrumentationTestCase2<Mai
 		solo.clickLongOnText(cat);
 
 		solo.clickOnText(solo.getString(R.string.rename));
-		solo.sleep(100);
 		solo.clearEditText(0);
 		UiTestUtils.enterText(solo, 0, kat);
 		solo.sendKey(Solo.ENTER);

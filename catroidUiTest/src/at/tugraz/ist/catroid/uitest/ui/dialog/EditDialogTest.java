@@ -55,7 +55,6 @@ public class EditDialogTest extends ActivityInstrumentationTestCase2<ScriptTabAc
 		String buttonPositiveText = solo.getString(R.string.ok);
 		solo.clickLongOnText(brickWhenStartedText);
 		solo.clickOnText(getActivity().getString(R.string.delete));
-		solo.sleep(1000);
 
 		UiTestUtils.addNewBrick(solo, R.string.brick_place_at);
 		solo.clickOnText(brickWhenStartedText);
