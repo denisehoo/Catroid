@@ -114,9 +114,7 @@ public class SoundActivityTest extends ActivityInstrumentationTestCase2<ScriptTa
 		solo.clearEditText(0);
 		solo.enterText(0, newName);
 		solo.setActivityOrientation(Solo.LANDSCAPE);
-		solo.sleep(200);
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(200);
 		assertTrue("EditText field got cleared after changing orientation", solo.searchText(newName));
 		solo.sendKey(Solo.ENTER);
 		solo.sleep(200);
@@ -174,14 +172,11 @@ public class SoundActivityTest extends ActivityInstrumentationTestCase2<ScriptTa
 		solo.clickOnView(solo.getView(R.id.sound_name));
 		assertTrue("Dialog is not visible", solo.searchText(buttonOKText));
 		solo.setActivityOrientation(Solo.LANDSCAPE);
-		solo.sleep(200);
 		assertTrue("Dialog is not visible", solo.searchText(buttonOKText));
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(100);
 		solo.clearEditText(0);
 		solo.enterText(0, newName);
 		solo.setActivityOrientation(Solo.LANDSCAPE);
-		solo.sleep(200);
 		assertTrue("EditText field got cleared after changing orientation", solo.searchText(newName));
 		solo.setActivityOrientation(Solo.PORTRAIT);
 		solo.waitForText(buttonOKText);
