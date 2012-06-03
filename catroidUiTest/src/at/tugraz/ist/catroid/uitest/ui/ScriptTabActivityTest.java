@@ -165,32 +165,26 @@ public class ScriptTabActivityTest extends ActivityInstrumentationTestCase2<Scri
 		testTabText(new String[] { scriptsLabel, backgroundsLabel, soundsLabel });
 		testTabIcons(new int[] { scriptsSelector, backgroundsSelector, soundsSelector });
 
-		solo.sleep(100);
 		solo.clickOnText(backgroundsLabel);
 		testTabText(new String[] { backgroundsLabel, scriptsLabel, soundsLabel });
 		testTabIcons(new int[] { backgroundsSelector, scriptsSelector, soundsSelector });
 
-		solo.sleep(100);
 		solo.clickOnText(soundsLabel);
 		testTabText(new String[] { soundsLabel, scriptsLabel, backgroundsLabel });
 		testTabIcons(new int[] { soundsSelector, scriptsSelector, backgroundsSelector });
 
-		solo.sleep(100);
 		solo.goBack();
 		solo.clickInList(2);
 		testTabText(new String[] { scriptsLabel, costumesLabel, soundsLabel });
 		testTabIcons(new int[] { scriptsSelector, costumesSelector, soundsSelector });
 
-		solo.sleep(100);
 		solo.clickOnText(costumesLabel);
 		testTabText(new String[] { costumesLabel, scriptsLabel, soundsLabel });
 		testTabIcons(new int[] { costumesSelector, scriptsSelector, soundsSelector });
 	}
 
 	private void addNewSprite(String spriteName) {
-		solo.sleep(300);
 		UiTestUtils.clickOnLinearLayout(solo, R.id.btn_action_add_button);
-		solo.sleep(200);
 		solo.enterText(0, spriteName);
 		solo.goBack();
 		solo.clickOnButton(solo.getString(R.string.ok));
