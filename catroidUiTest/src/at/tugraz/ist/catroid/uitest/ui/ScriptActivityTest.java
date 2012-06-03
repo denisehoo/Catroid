@@ -211,13 +211,11 @@ public class ScriptActivityTest extends ActivityInstrumentationTestCase2<ScriptT
 		assertTrue("A category was not visible after opening BrickCategoryDialog",
 				solo.searchText(categoryControlLabel));
 		solo.setActivityOrientation(Solo.LANDSCAPE);
-		solo.sleep(200);
 		assertTrue("A category was not visible after changing orientation", solo.searchText(categoryMotionLabel));
 		assertTrue("A category was not visible after changing orientation", solo.searchText(categoryLooksLabel));
 		assertTrue("A category was not visible after changing orientation", solo.searchText(categorySoundLabel));
 		assertTrue("A category was not visible after changing orientation", solo.searchText(categoryControlLabel));
 		solo.setActivityOrientation(Solo.PORTRAIT);
-		solo.sleep(200);
 		assertTrue("A category was not visible after changing orientation", solo.searchText(categoryMotionLabel));
 		assertTrue("A category was not visible after changing orientation", solo.searchText(categoryLooksLabel));
 		assertTrue("A category was not visible after changing orientation", solo.searchText(categorySoundLabel));
@@ -322,6 +320,6 @@ public class ScriptActivityTest extends ActivityInstrumentationTestCase2<ScriptT
 			}
 		});
 
-		solo.sleep(1000);
+		solo.sleep(300);
 	}
 }
