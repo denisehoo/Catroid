@@ -40,6 +40,9 @@ Example:
 python handle_project.py test.zip ~/hg/catroid 42 .
 '''
 
+#Constants
+PROJECT_XML = 'project.xml'
+
 def unzip_project(archive_name):
     project_name = os.path.splitext(archive_name)[0]
     zipfile.ZipFile(archive_name).extractall(project_name)
@@ -72,11 +75,11 @@ def rename_file_in_project(old_name, new_name, project_file_path, resource_type)
     doc.writexml(f)
     f.close()
 
-# OLD project.xml
-# NEW projectcode.xml
 def rename_resources(path_to_project, project_name):
-    #OLD: os.rename(os.path.join(path_to_project, project_name + '.xml'),\
-    #OLD:          os.path.join(path_to_project, 'projectcode.xml'))
+#TODO Remove the following two lines
+    os.rename(os.path.join(path_to_project, 'projectcode.xml'),\
+        os.path.join(path_to_project, PROJECT_XML))
+
     res_token = 'resource'
     res_count = 0
     for resource_type in ['images', 'sounds']:
@@ -88,7 +91,7 @@ def rename_resources(path_to_project, project_name):
             if verify_checksum(os.path.join(path, filename)):
                 new_filename = res_token + str(res_count) + extension
                 rename_file_in_project(filename, new_filename,\
-                                    os.path.join(path_to_project, 'projectcode.xml'),\
+                                    os.path.join(path_to_project, PROJECT_XML),\
                                     resource_type)
                 os.rename(os.path.join(path, filename),\
                            os.path.join(path, new_filename))
@@ -107,8 +110,8 @@ def copy_project(path_to_catroid, path_to_project):
             shutil.move(os.path.join(path_to_project, resource_type, filename),\
                     os.path.join(path_to_project, 'catroid', 'assets', resource_type, filename))
 
-    shutil.move(os.path.join(path_to_project, 'projectcode.xml'),\
-                    os.path.join(path_to_project, 'catroid', 'assets', 'projectcode.xml'))
+    shutil.move(os.path.join(path_to_project, PROJECT_XML),\
+                    os.path.join(path_to_project, 'catroid', 'assets', PROJECT_XML))
 
 def set_project_name(new_name, path_to_file):
     doc = xml.dom.minidom.parse(path_to_file)
@@ -148,8 +151,8 @@ def edit_manifest(path_to_project):
     doc = xml.dom.minidom.parse(path_to_manifest)
 
     # TODO: Check what happens if RECORD_AUDIO, BLUETOOTH, ACCESS_NETWORK_STATE will be removed
-    for node in doc.getElementsByTagName('uses-permission'):
-        node.parentNode.removeChild(node)
+    #for node in doc.getElementsByTagName('uses-permission'):
+    #    node.parentNode.removeChild(node)
 
     for node in doc.getElementsByTagName('activity'):
         for i in range(0, node.attributes.length):
@@ -188,7 +191,7 @@ def main():
     print path_to_project
     rename_resources(path_to_project, project_filename)
 
-    project_name = get_project_name(os.path.join(path_to_project, 'projectcode.xml'))
+    project_name = get_project_name(os.path.join(path_to_project, PROJECT_XML))
     copy_project(path_to_catroid, path_to_project)
 
     if os.path.exists(os.path.join(path_to_project, 'catroid', 'gen')):
@@ -201,7 +204,7 @@ def main():
     # TODO: replace all language files
     set_project_name(project_name, os.path.join(path_to_project, 'catroid', 'res', 'values', 'strings.xml'))
 
-    os.system('ant release -f ' + os.path.join(path_to_project, 'catroid', 'build.xml'))
+    os.system('ant debug -f ' + os.path.join(path_to_project, 'catroid', 'build.xml'))
     #os.system('ant installd -f ' + os.path.join(path_to_project, 'catroid', 'build.xml'))
     for filename in os.listdir(os.path.join(path_to_project, 'catroid', 'bin')):
         if filename.endswith('release.apk'):
