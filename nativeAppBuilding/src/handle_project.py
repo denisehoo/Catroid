@@ -24,7 +24,8 @@ import shutil
 import fileinput
 import hashlib
 import xml.dom.minidom
-
+import codecs
+import glob
 
 '''
 Automatically build and sign Catroid application.
@@ -66,8 +67,8 @@ def rename_file_in_project(old_name, new_name, project_file_path, resource_type)
         if node.childNodes[0].nodeValue == old_name:
             node.childNodes[0].nodeValue = new_name
        
-    f = open(project_file_path, 'wb')
-    doc.writexml(f)
+    f = codecs.open(project_file_path, 'wb', 'utf-8')
+    doc.writexml(f, encoding='utf-8')
     f.close()
 
 def rename_resources(path_to_project, project_name):
@@ -115,8 +116,8 @@ def set_project_name(new_name, path_to_file):
         if node.attributes.item(0).value == 'app_name':
             node.childNodes[0].nodeValue = new_name
     
-    f = open(path_to_file, 'wb')
-    doc.writexml(f)
+    f = codecs.open(path_to_file, 'wb', 'utf-8')
+    doc.writexml(f, encoding='utf-8')
     f.close()
     
 def get_project_name(project_filename):
@@ -155,8 +156,8 @@ def edit_manifest(path_to_project):
                 if node.attributes.item(i).value == '.ui.MainMenuActivity':
                    node.attributes.item(i).value = '.stage.NativeAppActivity'        
 
-    f = open(path_to_manifest, 'wb')
-    doc.writexml(f)
+    f = codecs.open(path_to_manifest, 'wb', 'utf-8')
+    doc.writexml(f, encoding='utf-8')
     f.close()
     
 
@@ -191,8 +192,9 @@ def main():
 
     rename_package(path_to_project, 'app_' + str(project_id))
 
-    # TODO: replace all language files
-    set_project_name(project_name, os.path.join(path_to_project, 'catroid', 'res', 'values', 'strings.xml'))
+    language_dirs = glob.glob(os.path.join(path_to_project, 'catroid', 'res', 'values*'))
+    for curr_lang_dir in language_dirs:
+        set_project_name(project_name, os.path.join(curr_lang_dir, 'strings.xml'))
 
     os.system('ant debug -f ' + os.path.join(path_to_project, 'catroid', 'build.xml'))
     #os.system('ant installd -f ' + os.path.join(path_to_project, 'catroid', 'build.xml'))

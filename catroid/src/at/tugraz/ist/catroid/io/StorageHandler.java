@@ -170,7 +170,6 @@ public class StorageHandler {
 				Project project = (Project) xstream.fromXML(spfFileStream);
 
 				copyFilesToSdCard(Utils.buildProjectPath(project.getName()) + "/");
-				Thread.sleep(1000);
 
 				return project;
 			}
