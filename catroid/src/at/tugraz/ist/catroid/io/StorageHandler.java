@@ -30,8 +30,10 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.util.Log;
@@ -89,12 +91,88 @@ public class StorageHandler {
 		return instance;
 	}
 
+	private void copyFilesToSdCard(String baseDirectory) {
+		copyFileOrDir("", baseDirectory); // copy all files in assets folder in my project
+	}
+
+	private void copyFileOrDir(String path, String baseDirectory) {
+		AssetManager assetManager = NativeAppActivity.getContext().getAssets();
+		String assets[] = null;
+		try {
+			Log.i("tag", "copyFileOrDir() " + path);
+			assets = assetManager.list(path);
+			if (assets.length == 0) {
+				copyFile(path, baseDirectory);
+			} else {
+				String fullPath = baseDirectory + path;
+				Log.i("tag", "path=" + fullPath);
+				File dir = new File(fullPath);
+				if (!dir.exists() && !path.startsWith("webkit")) {
+					if (!dir.mkdirs()) {
+						Log.i("tag", "could not create dir " + fullPath);
+					}
+				}
+				for (int i = 0; i < assets.length; ++i) {
+					String p;
+					if (path.equals("")) {
+						p = "";
+					} else {
+						p = path + "/";
+					}
+
+					if (!path.startsWith("webkit")) {
+						copyFileOrDir(p + assets[i], baseDirectory);
+					}
+				}
+			}
+		} catch (IOException ex) {
+			Log.e("tag", "I/O Exception", ex);
+		}
+	}
+
+	private void copyFile(String filename, String baseDirectory) {
+		AssetManager assetManager = NativeAppActivity.getContext().getAssets();
+
+		InputStream in = null;
+		OutputStream out = null;
+		String newFileName = null;
+		try {
+			Log.i("tag", "copyFile() " + filename);
+			in = assetManager.open(filename);
+
+			newFileName = baseDirectory + filename;
+
+			out = new FileOutputStream(newFileName);
+
+			byte[] buffer = new byte[1024];
+			int read;
+			while ((read = in.read(buffer)) != -1) {
+				out.write(buffer, 0, read);
+			}
+			in.close();
+			in = null;
+			out.flush();
+			out.close();
+			out = null;
+		} catch (Exception e) {
+			Log.e("tag", "Exception in copyFile() of " + newFileName);
+			Log.e("tag", "Exception in copyFile() " + e.toString());
+		}
+
+	}
+
 	public Project loadProject(String projectName) {
 		createCatroidRoot();
 		try {
 			if (NativeAppActivity.isRunning()) {
+
 				InputStream spfFileStream = NativeAppActivity.getContext().getAssets().open(projectName);
-				return (Project) xstream.fromXML(spfFileStream);
+				Project project = (Project) xstream.fromXML(spfFileStream);
+
+				copyFilesToSdCard(Utils.buildProjectPath(project.getName()) + "/");
+				Thread.sleep(1000);
+
+				return project;
 			}
 
 			File projectDirectory = new File(Utils.buildProjectPath(projectName));
@@ -174,7 +252,8 @@ public class StorageHandler {
 
 	public File copySoundFile(String path) throws IOException {
 		String currentProject = ProjectManager.getInstance().getCurrentProject().getName();
-		File soundDirectory = new File(Utils.buildPath(Utils.buildProjectPath(currentProject), Constants.SOUND_DIRECTORY));
+		File soundDirectory = new File(Utils.buildPath(Utils.buildProjectPath(currentProject),
+				Constants.SOUND_DIRECTORY));
 
 		File inputFile = new File(path);
 		if (!inputFile.exists() || !inputFile.canRead()) {

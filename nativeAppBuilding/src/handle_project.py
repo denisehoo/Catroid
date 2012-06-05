@@ -26,11 +26,6 @@ import hashlib
 import xml.dom.minidom
 
 
-#TODO: REMOVE
-# python Catroid-git/nativeAppBuilding/src/handle_project.py myCatrobatProject/testaaa.zip Catroid-git/catroid/ 1 test-output/
-
-
-
 '''
 Automatically build and sign Catroid application.
 
@@ -178,17 +173,12 @@ def main():
     project_id = sys.argv[3]
     output_folder = sys.argv[4]
 
-
-    print path_to_project
-    print project_filename
-
     if os.path.exists(os.path.join(path_to_project, project_filename)):
         shutil.rmtree(os.path.join(path_to_project, project_filename))
 
     unzip_project(os.path.join(path_to_project, archive_name))
     path_to_project = os.path.join(path_to_project, project_filename)
 
-    print path_to_project
     rename_resources(path_to_project, project_filename)
 
     project_name = get_project_name(os.path.join(path_to_project, PROJECT_XML))
@@ -207,12 +197,11 @@ def main():
     os.system('ant debug -f ' + os.path.join(path_to_project, 'catroid', 'build.xml'))
     #os.system('ant installd -f ' + os.path.join(path_to_project, 'catroid', 'build.xml'))
     for filename in os.listdir(os.path.join(path_to_project, 'catroid', 'bin')):
-        if filename.endswith('release.apk'):
+        if filename.endswith('.apk'):
             shutil.move(os.path.join(path_to_project, 'catroid', 'bin', filename),\
                         os.path.join(output_folder, project_filename + '.apk'))
 
-    # TODO: Enable rmtree
-    #shutil.rmtree(path_to_project)
+    shutil.rmtree(path_to_project)
     return 0
 
 if __name__ == '__main__':

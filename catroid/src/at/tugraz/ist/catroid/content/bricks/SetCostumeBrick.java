@@ -55,10 +55,14 @@ public class SetCostumeBrick implements Brick {
 
 	public void execute() {
 		if (costumeData != null && sprite != null && sprite.getCostumeDataList().contains(costumeData)) {
+
 			if (!NativeAppActivity.isRunning()) {
 				sprite.costume.setCostumeData(costumeData);
 			} else {
-				sprite.costume.setCostumeDataInternal(costumeData);
+
+				// OLD: sprite.costume.setCostumeDataInternal(costumeData);
+				// TODO: Adapt reading files from asset instead of sdcard in case of native app
+				sprite.costume.setCostumeData(costumeData);
 			}
 		}
 	}
